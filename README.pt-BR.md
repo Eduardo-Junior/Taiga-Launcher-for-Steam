@@ -9,9 +9,9 @@
   Capa, página do jogo completa, conquistas com a notificação nativa da Steam e tempo de jogo. Sem plugins e sem configuração.
 </p>
 
-<p align="center">
-  <a href="https://github.com/GabrielTaiga/Taiga-Launcher/releases/latest"><img src="https://img.shields.io/badge/Baixar-e0353d?style=for-the-badge&logo=windows&logoColor=white" height="60" alt="Baixar"></a>
-</p>
+<h2 align="center">
+  <a href="https://github.com/GabrielTaiga/Taiga-Launcher/releases/latest">Baixar</a>
+</h2>
 
 <p align="center">
   <a href="README.md">English</a> ·

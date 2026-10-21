@@ -9,9 +9,9 @@
   Cover, vollständige Spielseite, Erfolge mit der nativen Steam-Benachrichtigung und Spielzeit. Ohne Plugins, ohne Einrichtung.
 </p>
 
-<p align="center">
-  <a href="https://github.com/GabrielTaiga/Taiga-Launcher/releases/latest"><img src="https://img.shields.io/badge/Herunterladen-e0353d?style=for-the-badge&logo=windows&logoColor=white" height="60" alt="Herunterladen"></a>
-</p>
+<h2 align="center">
+  <a href="https://github.com/GabrielTaiga/Taiga-Launcher/releases/latest">Herunterladen</a>
+</h2>
 
 <p align="center">
   <a href="README.md">English</a> ·

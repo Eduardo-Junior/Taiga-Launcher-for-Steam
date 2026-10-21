@@ -9,9 +9,9 @@
   Covers, a complete game page, achievements with the native Steam popup and playtime. No plugins, no setup.
 </p>
 
-<p align="center">
-  <a href="https://github.com/GabrielTaiga/Taiga-Launcher/releases/latest"><img src="https://img.shields.io/badge/Download-e0353d?style=for-the-badge&logo=windows&logoColor=white" height="60" alt="Download"></a>
-</p>
+<h2 align="center">
+  <a href="https://github.com/GabrielTaiga/Taiga-Launcher/releases/latest">Download</a>
+</h2>
 
 <p align="center">
   <b>English</b> ·

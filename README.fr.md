@@ -9,9 +9,9 @@
   Jaquette, page de jeu complète, succès avec la notification native de Steam et temps de jeu. Sans plugin, sans configuration.
 </p>
 
-<p align="center">
-  <a href="https://github.com/GabrielTaiga/Taiga-Launcher/releases/latest"><img src="https://img.shields.io/badge/T%C3%A9l%C3%A9charger-e0353d?style=for-the-badge&logo=windows&logoColor=white" height="60" alt="Télécharger"></a>
-</p>
+<h2 align="center">
+  <a href="https://github.com/GabrielTaiga/Taiga-Launcher/releases/latest">Télécharger</a>
+</h2>
 
 <p align="center">
   <a href="README.md">English</a> ·
