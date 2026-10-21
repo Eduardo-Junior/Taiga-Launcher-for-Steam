@@ -24,10 +24,6 @@
   <a href="https://github.com/sponsors/GabrielTaiga"><img src="https://img.shields.io/badge/apoiar-GitHub-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Apoiar"></a>
 </p>
 
-<p align="center">
-  <img src="docs/screenshots/01-steam-page.png" alt="Jogo de PSP na Biblioteca da Steam com a página completa">
-</p>
-
 ---
 
 ## 🔥 Destaques
@@ -45,26 +41,38 @@
 
 ## 📸 Imagens
 
-### Página do jogo dentro da Steam
-<img src="docs/screenshots/01-steam-page.png" alt="Página do jogo dentro da Steam">
+### Jogos de emulador e de outras lojas dentro da Steam
+<img src="https://i.imgur.com/rvg56nz.png" alt="Jogos de emulador e de outras lojas dentro da Steam">
 
-### Conquista com a notificação nativa da Steam
-<img src="docs/screenshots/02-achievement.png" alt="Notificação de conquista da Steam">
+### Todas as conquistas dentro da Steam
+<img src="https://i.imgur.com/hVSNh4q.png" alt="Todas as conquistas dentro da Steam">
 
-### Sua coleção no Taiga Launcher
-<img src="docs/screenshots/03-collection.png" alt="Coleção">
+### Todas as informações, como um jogo nativo
+<img src="https://i.imgur.com/i2xpgKc.png" alt="Todas as informações, como um jogo nativo">
 
-### Seus jogos na Biblioteca da Steam
-<img src="docs/screenshots/04-steam-library.png" alt="Biblioteca da Steam">
+### Os jogos entram na contagem da sua biblioteca da Steam
+<img src="https://i.imgur.com/ZT5MEqG.png" alt="Os jogos entram na contagem da sua biblioteca da Steam">
 
-### Encontrando os jogos do PC
-<img src="docs/screenshots/05-find-games.png" alt="Procurar jogos">
+### Seus jogos na coleção do Taiga Launcher
+<img src="https://i.imgur.com/J45O3bz.png" alt="Seus jogos na coleção do Taiga Launcher">
 
-### Detalhes do jogo e conquistas
-<img src="docs/screenshots/06-game-details.png" alt="Detalhes do jogo">
+### Veja e altere todas as informações do jogo
+<img src="https://i.imgur.com/sCl5Pu1.png" alt="Veja e altere todas as informações do jogo">
 
-### Emuladores
-<img src="docs/screenshots/07-emulators.png" alt="Emuladores">
+### Jogos da Epic, GOG, Xbox e outras lojas
+<img src="https://i.imgur.com/B8UAbGW.png" alt="Jogos da Epic, GOG, Xbox e outras lojas">
+
+### Jogos de vários emuladores
+<img src="https://i.imgur.com/74aHDzy.png" alt="Jogos de vários emuladores">
+
+### Conecte suas contas para registrar as conquistas na Steam
+<img src="https://i.imgur.com/x5WfOD1.png" alt="Conecte suas contas para registrar as conquistas na Steam">
+
+### Simples de usar: os jogos são encontrados sozinhos
+<img src="https://i.imgur.com/8vbQ3ed.png" alt="Simples de usar: os jogos são encontrados sozinhos">
+
+### Personalize as capas direto no programa
+<img src="https://i.imgur.com/cY4pZbQ.png" alt="Personalize as capas direto no programa">
 
 ---
 
@@ -73,7 +81,7 @@
 ### Encontra seus jogos
 - ISOs e ROMs nas pastas dos emuladores.
 - Jogos instalados da **Epic, GOG, EA, Ubisoft, Battle.net, Rockstar, Xbox / Microsoft Store e Riot**.
-- Jogos de PC soltos em qualquer disco, inclusive **ports de console** (como o SpartanPort).
+- Jogos de PC soltos em qualquer disco, inclusive **ports de console** (como o God of War III do SpartanPort).
 - Nada entra duplicado: o mesmo jogo em duas lojas, ou um port junto com o dump do console, vira um item só.
 
 ### Identifica cada jogo certo
@@ -165,6 +173,7 @@ Use **Relatar problema** no menu lateral ou abra uma [issue](https://github.com/
 - 🎖️ **Seus troféus de console dentro da Steam:** troféus da PlayStation e conquistas do Xbox na sua biblioteca da Steam.
 - ✏️ **A página do jogo na Steam do seu jeito:** mude as conquistas, adicione cabeçalhos, seções e imagens e edite cada informação.
 - 💬 **Seu jogo no Discord, como um jogo da Steam:** o jogo que você abre aparece no seu perfil do Discord.
+- 🧩 **Editor de conquistas:** crie conquistas personalizadas para os seus jogos, inclusive os que não têm nenhuma.
 
 ---
 

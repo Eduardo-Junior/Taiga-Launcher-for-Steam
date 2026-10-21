@@ -24,10 +24,6 @@
   <a href="https://github.com/sponsors/GabrielTaiga"><img src="https://img.shields.io/badge/sponsor-GitHub-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Sponsor"></a>
 </p>
 
-<p align="center">
-  <img src="docs/screenshots/01-steam-page.png" alt="A PSP game in the Steam Library with the full game page">
-</p>
-
 ---
 
 ## 🔥 Highlights
@@ -45,26 +41,38 @@
 
 ## 📸 Screenshots
 
-### Game page inside Steam
-<img src="docs/screenshots/01-steam-page.png" alt="Game page inside Steam">
+### Emulator and other-store games inside Steam
+<img src="https://i.imgur.com/rvg56nz.png" alt="Emulator and other-store games inside Steam">
 
-### Achievement with the native Steam notification
-<img src="docs/screenshots/02-achievement.png" alt="Steam achievement notification">
+### Every achievement inside Steam
+<img src="https://i.imgur.com/hVSNh4q.png" alt="Every achievement inside Steam">
 
-### Your collection in Taiga Launcher
-<img src="docs/screenshots/03-collection.png" alt="Collection">
+### All the information, like a native game
+<img src="https://i.imgur.com/i2xpgKc.png" alt="All the information, like a native game">
 
-### Your games in the Steam Library
-<img src="docs/screenshots/04-steam-library.png" alt="Steam Library">
+### Games count toward your Steam library total
+<img src="https://i.imgur.com/ZT5MEqG.png" alt="Games count toward your Steam library total">
 
-### Finding games on your PC
-<img src="docs/screenshots/05-find-games.png" alt="Find games">
+### Your games in the Taiga Launcher collection
+<img src="https://i.imgur.com/J45O3bz.png" alt="Your games in the Taiga Launcher collection">
 
-### Game details and achievements
-<img src="docs/screenshots/06-game-details.png" alt="Game details">
+### See and edit all of a game's information
+<img src="https://i.imgur.com/sCl5Pu1.png" alt="See and edit all of a game's information">
 
-### Emulators
-<img src="docs/screenshots/07-emulators.png" alt="Emulators">
+### Games from Epic, GOG, Xbox and other stores
+<img src="https://i.imgur.com/B8UAbGW.png" alt="Games from Epic, GOG, Xbox and other stores">
+
+### Games from many emulators
+<img src="https://i.imgur.com/74aHDzy.png" alt="Games from many emulators">
+
+### Connect your accounts to track achievements in Steam
+<img src="https://i.imgur.com/x5WfOD1.png" alt="Connect your accounts to track achievements in Steam">
+
+### Easy to use: games are found automatically
+<img src="https://i.imgur.com/8vbQ3ed.png" alt="Easy to use: games are found automatically">
+
+### Customize covers right in the app
+<img src="https://i.imgur.com/cY4pZbQ.png" alt="Customize covers right in the app">
 
 ---
 
@@ -165,6 +173,7 @@ Use **Report a problem** in the side menu, or open an [issue](https://github.com
 - 🎖️ **Your console trophies inside Steam:** PlayStation trophies and Xbox achievements in your Steam library.
 - ✏️ **The Steam game page your way:** change achievements, add headers, sections and images, edit every detail.
 - 💬 **Your game on Discord, like a Steam game:** the game you open shows on your Discord profile.
+- 🧩 **Achievement editor:** create custom achievements for your games, even ones that have none.
 
 ---
 

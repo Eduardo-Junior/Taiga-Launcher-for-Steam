@@ -24,10 +24,6 @@
   <a href="https://github.com/sponsors/GabrielTaiga"><img src="https://img.shields.io/badge/unterst%C3%BCtzen-GitHub-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Unterstützen"></a>
 </p>
 
-<p align="center">
-  <img src="docs/screenshots/01-steam-page.png" alt="Ein PSP-Spiel in der Steam-Bibliothek mit vollständiger Spielseite">
-</p>
-
 ---
 
 ## 🔥 Highlights
@@ -45,26 +41,38 @@
 
 ## 📸 Screenshots
 
-### Spielseite in Steam
-<img src="docs/screenshots/01-steam-page.png" alt="Spielseite in Steam">
+### Emulator- und Store-Spiele direkt in Steam
+<img src="https://i.imgur.com/rvg56nz.png" alt="Emulator- und Store-Spiele direkt in Steam">
 
-### Erfolg mit der nativen Steam-Benachrichtigung
-<img src="docs/screenshots/02-achievement.png" alt="Steam-Erfolgsbenachrichtigung">
+### Alle Erfolge in Steam
+<img src="https://i.imgur.com/hVSNh4q.png" alt="Alle Erfolge in Steam">
 
-### Deine Sammlung in Taiga Launcher
-<img src="docs/screenshots/03-collection.png" alt="Sammlung">
+### Alle Infos, wie bei einem nativen Spiel
+<img src="https://i.imgur.com/i2xpgKc.png" alt="Alle Infos, wie bei einem nativen Spiel">
 
-### Deine Spiele in der Steam-Bibliothek
-<img src="docs/screenshots/04-steam-library.png" alt="Steam-Bibliothek">
+### Spiele zählen zur Gesamtzahl deiner Steam-Bibliothek
+<img src="https://i.imgur.com/ZT5MEqG.png" alt="Spiele zählen zur Gesamtzahl deiner Steam-Bibliothek">
 
-### Spiele auf dem PC finden
-<img src="docs/screenshots/05-find-games.png" alt="Spiele finden">
+### Deine Spiele in der Taiga-Launcher-Sammlung
+<img src="https://i.imgur.com/J45O3bz.png" alt="Deine Spiele in der Taiga-Launcher-Sammlung">
 
-### Spieldetails und Erfolge
-<img src="docs/screenshots/06-game-details.png" alt="Spieldetails">
+### Alle Spielinfos ansehen und bearbeiten
+<img src="https://i.imgur.com/sCl5Pu1.png" alt="Alle Spielinfos ansehen und bearbeiten">
 
-### Emulatoren
-<img src="docs/screenshots/07-emulators.png" alt="Emulatoren">
+### Spiele von Epic, GOG, Xbox und anderen Stores
+<img src="https://i.imgur.com/B8UAbGW.png" alt="Spiele von Epic, GOG, Xbox und anderen Stores">
+
+### Spiele aus vielen Emulatoren
+<img src="https://i.imgur.com/74aHDzy.png" alt="Spiele aus vielen Emulatoren">
+
+### Verbinde deine Konten, um Erfolge in Steam zu erfassen
+<img src="https://i.imgur.com/x5WfOD1.png" alt="Verbinde deine Konten, um Erfolge in Steam zu erfassen">
+
+### Einfach zu bedienen: Spiele werden automatisch gefunden
+<img src="https://i.imgur.com/8vbQ3ed.png" alt="Einfach zu bedienen: Spiele werden automatisch gefunden">
+
+### Cover direkt im Programm anpassen
+<img src="https://i.imgur.com/cY4pZbQ.png" alt="Cover direkt im Programm anpassen">
 
 ---
 
@@ -165,6 +173,7 @@ Nutze **Problem melden** im Seitenmenü oder eröffne ein [Issue](https://github
 - 🎖️ **Deine Konsolen-Trophäen in Steam:** PlayStation-Trophäen und Xbox-Erfolge in deiner Steam-Bibliothek.
 - ✏️ **Die Steam-Spielseite nach deinem Geschmack:** Erfolge ändern, Überschriften, Abschnitte und Bilder hinzufügen, jedes Detail bearbeiten.
 - 💬 **Dein Spiel auf Discord, wie ein Steam-Spiel:** das Spiel, das du startest, erscheint in deinem Discord-Profil.
+- 🧩 **Erfolgs-Editor:** eigene Erfolge für deine Spiele erstellen, auch für Spiele ohne Erfolge.
 
 ---
 

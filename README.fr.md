@@ -24,10 +24,6 @@
   <a href="https://github.com/sponsors/GabrielTaiga"><img src="https://img.shields.io/badge/soutenir-GitHub-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Soutenir"></a>
 </p>
 
-<p align="center">
-  <img src="docs/screenshots/01-steam-page.png" alt="Un jeu PSP dans la Bibliothèque Steam avec la page complète">
-</p>
-
 ---
 
 ## 🔥 Points forts
@@ -45,26 +41,38 @@
 
 ## 📸 Captures d'écran
 
-### Page du jeu dans Steam
-<img src="docs/screenshots/01-steam-page.png" alt="Page du jeu dans Steam">
+### Jeux d'émulateur et d'autres boutiques dans Steam
+<img src="https://i.imgur.com/rvg56nz.png" alt="Jeux d'émulateur et d'autres boutiques dans Steam">
 
-### Succès avec la notification native de Steam
-<img src="docs/screenshots/02-achievement.png" alt="Notification de succès Steam">
+### Tous les succès dans Steam
+<img src="https://i.imgur.com/hVSNh4q.png" alt="Tous les succès dans Steam">
 
-### Votre collection dans Taiga Launcher
-<img src="docs/screenshots/03-collection.png" alt="Collection">
+### Toutes les informations, comme un jeu natif
+<img src="https://i.imgur.com/i2xpgKc.png" alt="Toutes les informations, comme un jeu natif">
 
-### Vos jeux dans la Bibliothèque Steam
-<img src="docs/screenshots/04-steam-library.png" alt="Bibliothèque Steam">
+### Les jeux comptent dans le total de votre bibliothèque Steam
+<img src="https://i.imgur.com/ZT5MEqG.png" alt="Les jeux comptent dans le total de votre bibliothèque Steam">
 
-### Recherche des jeux du PC
-<img src="docs/screenshots/05-find-games.png" alt="Rechercher des jeux">
+### Vos jeux dans la collection Taiga Launcher
+<img src="https://i.imgur.com/J45O3bz.png" alt="Vos jeux dans la collection Taiga Launcher">
 
-### Détails du jeu et succès
-<img src="docs/screenshots/06-game-details.png" alt="Détails du jeu">
+### Consultez et modifiez toutes les informations du jeu
+<img src="https://i.imgur.com/sCl5Pu1.png" alt="Consultez et modifiez toutes les informations du jeu">
 
-### Émulateurs
-<img src="docs/screenshots/07-emulators.png" alt="Émulateurs">
+### Jeux Epic, GOG, Xbox et d'autres boutiques
+<img src="https://i.imgur.com/B8UAbGW.png" alt="Jeux Epic, GOG, Xbox et d'autres boutiques">
+
+### Jeux de nombreux émulateurs
+<img src="https://i.imgur.com/74aHDzy.png" alt="Jeux de nombreux émulateurs">
+
+### Connectez vos comptes pour suivre les succès dans Steam
+<img src="https://i.imgur.com/x5WfOD1.png" alt="Connectez vos comptes pour suivre les succès dans Steam">
+
+### Simple à utiliser : les jeux sont trouvés automatiquement
+<img src="https://i.imgur.com/8vbQ3ed.png" alt="Simple à utiliser : les jeux sont trouvés automatiquement">
+
+### Personnalisez les jaquettes directement dans le programme
+<img src="https://i.imgur.com/cY4pZbQ.png" alt="Personnalisez les jaquettes directement dans le programme">
 
 ---
 
@@ -165,6 +173,7 @@ Utilisez **Signaler un problème** dans le menu latéral, ou ouvrez une [issue](
 - 🎖️ **Vos trophées de console dans Steam :** trophées PlayStation et succès Xbox dans votre bibliothèque Steam.
 - ✏️ **La page du jeu Steam à votre façon :** modifiez les succès, ajoutez des titres, des sections et des images, éditez chaque détail.
 - 💬 **Votre jeu sur Discord, comme un jeu Steam :** le jeu que vous lancez apparaît sur votre profil Discord.
+- 🧩 **Éditeur de succès :** créez des succès personnalisés pour vos jeux, même ceux qui n'en ont aucun.
 
 ---
 
