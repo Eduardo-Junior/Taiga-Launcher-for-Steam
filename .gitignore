@@ -1,0 +1,26 @@
+# Chaves pessoais de API (nunca vão para o repositório)
+resources/app/chaves.json
+
+# Executável e arquivos do Electron: vão só na Release (veja docs/BUILD.md)
+/Taiga Launcher.exe
+/*.dll
+/*.pak
+/*.bin
+/*.dat
+/locales/
+/version
+/vk_swiftshader_icd.json
+/LICENSES.chromium.html
+
+# Gerados
+/dist/
+node_modules/
+*.log
+tools/resedit.cjs
+
+# Sistema e editores
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/

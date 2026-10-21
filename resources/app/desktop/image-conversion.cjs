@@ -1,0 +1,4 @@
+'use strict';
+// Decode through Chromium so WebP logos do not depend on nativeImage's PNG/JPEG decoder.
+function conversionScript(base64){return `(async()=>{const bytes=Uint8Array.from(atob(${JSON.stringify(base64)}),c=>c.charCodeAt(0));const image=await createImageBitmap(new Blob([bytes]));try{if(!image.width||!image.height||image.width*image.height>100000000)throw Error('Dimensões da imagem inválidas.');const canvas=document.createElement('canvas');const scale=Math.min(1,2048/image.width,2048/image.height);canvas.width=Math.max(1,Math.round(image.width*scale));canvas.height=Math.max(1,Math.round(image.height*scale));canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height);return canvas.toDataURL('image/png').split(',')[1];}finally{image.close();}})()`;}
+module.exports={conversionScript};

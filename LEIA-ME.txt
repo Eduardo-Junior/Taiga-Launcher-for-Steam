@@ -1,0 +1,129 @@
+﻿================================================================================
+                               TAIGA LAUNCHER
+            Seus jogos de emulador, de PC e de outras lojas na Steam
+                       Criado por Taiga (GabrielTaiga)
+================================================================================
+
+O QUE É
+-------
+O Taiga Launcher coloca na Steam os jogos que não são da Steam (emuladores,
+jogos de PC soltos, Epic, GOG, EA, Ubisoft, Xbox, ports de console) como se
+fossem jogos da própria Steam:
+
+  * capa, fundo, logo e ícone;
+  * página do jogo completa, com descrição, notícias e tempo de jogo;
+  * conquistas com a notificação nativa da Steam;
+  * o jogo aparecendo no Discord enquanto você joga (opcional).
+
+
+REQUISITOS
+----------
+  * Windows 10 ou 11 (64 bits).
+  * Steam instalada, com a sua conta já usada pelo menos uma vez neste PC.
+  * Internet para baixar capas, informações e conquistas. Os jogos em si
+    rodam sem internet.
+
+Não precisa instalar mais nada. O programa é portátil.
+
+
+COMO INSTALAR
+-------------
+  1. Extraia a pasta inteira onde quiser, por exemplo:
+       C:\Jogos\Taiga Launcher
+     Não separe o "Taiga Launcher.exe" das outras pastas e arquivos.
+  2. Abra "Taiga Launcher.exe".
+  3. Na primeira vez, um passo a passo pede o idioma, a conta da Steam e
+     onde ficam os seus jogos. Depois é só esperar ele encontrar tudo.
+
+Aviso do Windows: pode aparecer "O Windows protegeu o computador", porque o
+programa ainda não tem assinatura digital paga. Clique em "Mais informações"
+e depois em "Executar assim mesmo".
+
+
+COMO USAR NO DIA A DIA
+----------------------
+  * Abre junto com o Windows, minimizado na bandeja (perto do relógio).
+    Assim a Steam já mostra as páginas personalizadas. Dá para desligar em
+    Configurações > Programa > "Abrir junto com o Windows".
+  * Fechar a janela NÃO fecha o programa: ele fica na bandeja para manter
+    a página do jogo e as conquistas funcionando na Steam.
+  * Para encerrar de verdade: clique com o botão direito no ícone da
+    bandeja e escolha "Sair".
+  * Jogue pela Steam normalmente. O Taiga Launcher conta o tempo de jogo e
+    avisa as conquistas.
+
+
+ATUALIZAR
+---------
+O programa avisa quando há versão nova. Clique em "Atualizar agora".
+Para atualizar à mão: feche pelo "Sair" na bandeja e extraia a versão nova
+por cima desta pasta. Seus jogos e configurações não são perdidos.
+
+
+PERGUNTAS RÁPIDAS
+-----------------
+Onde ficam meus dados?
+  Em %LOCALAPPDATA%\Taiga Launcher. A pasta do programa pode ser movida ou
+  trocada sem perder nada.
+
+O programa mexe nos meus jogos ou nas minhas contas?
+  Não. Ele só cria atalhos na Steam e lê arquivos de progresso. Nas contas
+  (Epic, GOG, Xbox, PlayStation, RetroAchievements) ele só lê conquistas.
+  Os logins ficam cifrados pelo próprio Windows.
+
+A página do jogo não apareceu na Steam.
+  Configurações > "Testar integração". Ou use "Reiniciar Steam com a
+  integração". Na primeira vez a Steam precisa ser reiniciada uma vez.
+
+Um jogo ficou ligado ao jogo errado da Steam.
+  Abra o jogo no Taiga Launcher e use "Associar jogo da Steam".
+
+Um jogo ficou sem capa.
+  O programa procura de novo sozinho de tempos em tempos. Para escolher
+  agora, abra o jogo e clique em "Editar".
+
+Como tiro tudo da Steam?
+  Configurações > Remover da Steam > "Remover tudo". Jogos e saves não
+  são tocados.
+
+Achei um problema.
+  Use o botão "Relatar problema" no menu lateral do programa.
+
+
+APOIE O PROJETO
+---------------
+O Taiga Launcher é gratuito. Se ele te ajudou, a aba "Apoiar" mostra como
+contribuir (GitHub Sponsors e, no Brasil, PIX).
+
+
+CRÉDITOS E LICENÇA
+------------------
+Taiga Launcher, criado por Taiga (GabrielTaiga).
+https://github.com/GabrielTaiga
+
+Licença Apache 2.0 (arquivo LICENSE): qualquer pessoa pode usar, estudar,
+modificar e distribuir. DAR OS CRÉDITOS É OBRIGATÓRIO: quem distribuir o
+programa ou uma versão baseada nele precisa manter o arquivo NOTICE e citar
+o autor original de forma visível, por exemplo:
+  "Baseado no Taiga Launcher, criado por Taiga (GabrielTaiga)".
+Versões modificadas precisam dizer que foram alteradas e não podem se
+apresentar como a versão oficial.
+
+Também usa, com agradecimento:
+  * NativeGameLink for Steam, de David Miranda (MIT): página do jogo na Steam.
+  * Electron e Chromium: base do programa.
+  * QR Code Generator, de Kazuhiko Arase (MIT): QR Code do PIX.
+  * Fontes Manrope e Sora (SIL Open Font License).
+  * Dados de SteamGridDB, IGDB, RetroAchievements, libretro, Wikipedia e
+    Wikidata, PCGamingWiki, Exophase e da loja da Steam.
+
+Agradecimentos aos projetos que inspiraram partes do programa: Millennium,
+SFP, BoilR, Playhub Metadata, Steam Achievement Notifier, e aos citados pelo
+NativeGameLink (game-data-linker, SteamAchievementManager,
+Achievement-Watcher e steam-non-steam-playtimes).
+
+Lista completa: arquivo NOTICE e resources\app\THIRD-PARTY-NOTICES.md.
+
+O Taiga Launcher não é afiliado à Valve, Sony, Microsoft, Epic Games, GOG,
+Nintendo, RetroAchievements nem Exophase. As marcas pertencem aos donos.
+================================================================================

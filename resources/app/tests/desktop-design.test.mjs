@@ -1,0 +1,16 @@
+import {importScanned} from './import-client.mjs';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
+import {createApp} from '../server.mjs';import {Providers} from '../lib/providers.mjs';import {iso} from './fixtures.mjs';
+const PNG=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWQAAAABJRU5ErkJggg==','base64');
+test('Desktop preferences persist, image uploads require native selection and artwork batches preserve selections on failure',async t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'taiga-design-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));const game=path.join(dir,'game.iso'),image=path.join(dir,'custom.png'),dataDir=path.join(dir,'data');fs.writeFileSync(game,iso());fs.writeFileSync(image,PNG);
+ const providersFactory=(cfg,data)=>{const p=new Providers(cfg,data);p.artwork=async()=>[{id:1,url:'https://cdn2.steamgriddb.com/example.png',preview:'https://cdn2.steamgriddb.com/example.png'}];p.image=async()=>{const name='ab12.png';fs.mkdirSync(path.join(data,'art'),{recursive:true});fs.writeFileSync(path.join(data,'art',name),PNG);return name;};return p;};
+ const port=48884,{server}=createApp({dataDir,port,providersFactory,picker:async k=>k==='art'?[image]:[]});await new Promise(r=>server.listen(port,'127.0.0.1',r));t.after(()=>new Promise(r=>server.close(r)));const cfg=JSON.parse(fs.readFileSync(path.join(dataDir,'config.json')));
+ async function call(route,body,status=200){const r=await fetch(`http://127.0.0.1:${port}/api/${route}`,{method:body===undefined?'GET':'POST',headers:{Authorization:'Bearer '+cfg.adminToken,'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});const d=await r.json();assert.equal(r.status,status,JSON.stringify(d));return d;}
+ await call('settings',{preferences:{theme:'dark',autoLookup:false,closeSteam:false,scanOnStart:false},sgdbKey:'test-secret'});await call('settings',{sgdbKey:''});const state=await call('state');assert.equal(state.settings.preferences.theme,'dark');assert.equal(state.settings.preferences.autoLookup,false);assert.equal(state.settings.credentials.sgdbKey,true);assert.equal(state.settings.sgdbKey,undefined);assert.equal(JSON.parse(fs.readFileSync(path.join(dataDir,'config.json'))).preferences.scanOnStart,false);
+ const scan=await importScanned(call,{paths:[game]}),id=scan.addedIds[0];await call('art-upload',{path:image},400);await call('pick',{kind:'art'});const upload=await call('art-upload',{path:image});assert.ok(upload.name.endsWith('.png'));
+ await call('art-save',{id,selections:{cover:upload.name,icon:upload.name}});let g=(await call('state')).games[0];assert.equal(g.art.cover,upload.name);assert.equal(g.artPinned.icon,true);
+ const gallery=await call('art-list',{id,kind:'cover'});await call('art-save',{id,selections:{cover:gallery.items[0].choice,hero:'forged'}},400);g=(await call('state')).games[0];assert.equal(g.art.cover,upload.name);assert.equal(g.art.hero,undefined);await call('art-save',{id,selections:{cover:gallery.items[0].choice}});assert.equal((await call('state')).games[0].art.cover,'ab12.png');
+});

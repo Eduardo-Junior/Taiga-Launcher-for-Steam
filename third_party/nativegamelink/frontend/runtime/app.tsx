@@ -1,0 +1,513 @@
+import React from 'react';
+import { Millennium, IconsModule, definePlugin } from '@steambrew/client';
+import { backendLog } from '../api/backend';
+import { mappings, loadMappings } from '../core/mappings';
+import { clearGameDataCache, warmupAllMappedGameData } from '../core/game-data';
+import { pruneCacheStorage, setProtectedCacheAppIds } from '../core/cache';
+import { getSteamLanguage, subscribeSteamLanguageChange, startSteamLanguageWatcher, stopSteamLanguageWatcher, setLocalizationDocumentProvider } from '../steam/localization';
+import { steamUIModeService } from '../steam/ui/SteamUIModeService';
+import { steamComponents } from '../steam/modules/SteamComponentResolver';
+import { gamepadRuntime } from '../steam/gamepad/GamepadRuntime';
+import { installLegacyAchievementCacheRepair } from '../steam/achievement-cache-repair';
+import { installNativeAchievementLayout } from '../steam/native-achievement-layout';
+import { SettingsContent } from '../settings/SettingsContent';
+import { clearShortcutRuntimeCaches, findActiveShortcutAppId, isSteamLibraryActive } from '../steam/shortcuts';
+import { clearLibraryAssetCaches, warmupAllMappedLibraryAssets } from '../features/library/artwork';
+import { clearCommunityItemCaches } from '../features/library/community-items';
+import { clearSocialRuntimeCaches, configureSocialRuntimeHost } from '../features/library/social';
+import { cancelPendingLibraryPaint, configureLibraryRuntimeHost, disposeLibraryRuntime, findNonSteamNotice, getCurrentInjectedAppId, getCurrentInjectedShortcutAppId, handleLibraryNavigation as handleNativeLibraryNavigation, refreshLibraryArtwork, resetLibraryInjection, syncLinkedFirstContent, tryInjectLibraryData } from '../features/library/runtime';
+import { DisposableRegistry } from '../core/disposables';
+import { mutationIsWithinSelector } from '../core/dom';
+import { configureShortcutRuntimeHost, disposeCustomizationArtwork, mutationMayContainProperties, startNativeAddAutoDetector, stopNativeAddAutoDetector, tryInjectCustomizationArtwork, tryInjectPropertiesField } from '../features/shortcuts/runtime';
+import { GDL_INJECTED } from '../features/library/constants';
+import { activateBigPicture, deactivateBigPicture, getBigPictureDocument, isBigPictureActive, refreshBigPicture } from '../features/big-picture/runtime';
+import { captureNativeUiBlueprints, clearNativeUiBlueprints } from '../steam/native-dom';
+import { installEarlyLinkedPlaybar, type EarlyLinkedPlaybar } from '../features/library/early-playbar';
+import { syncEarlyLinkedNotice } from '../features/library/early-notice';
+import { installNativeArtworkWarmup } from '../features/library/native-artwork-warmup';
+import { waitForNativeArtwork } from '../features/library/native-artwork-ready';
+import { resetResolvedCssClassModules } from '../steam/css';
+import {
+	clearLocalAchievementCache, configureAchievementRuntimeHost, disposeAchievementRuntime,
+	disposeLocalAchievementUI, disposeLocalAchievementsModal, installLocalAchievementUI, registerNativeAchievementToastWindow,
+	unregisterNativeAchievementToastWindow, showAchievementToast, startFirstLaunchAchievementWatcher,
+	stopFirstLaunchAchievementWatcher,
+} from '../features/achievements/runtime';
+import { startPlaytimeTracker, stopPlaytimeTracker } from '../features/playtime/tracker';
+import { isDesktopLibraryHomePlaytimeVisible, patchDesktopLibraryHomePlaytime, syncDesktopLibraryHomePlaytimeDom } from '../features/playtime/library-home';
+import { mutationMayContainDesktopPlaytime } from '../features/playtime/library-home-dom';
+import { processPendingLinkJobs } from '../features/shortcuts/link-job-queue';
+import { clearShortcutDetectionCache } from '../features/shortcuts/detection';
+import { mutationMayContainNonSteamNotice } from '../features/library/notice';
+import { isPublicSteamLibraryRoute, libraryRouteIdentity } from '../features/library/native-route';
+import { finishLibraryRouteExit, hasOwnedLibraryChrome } from '../features/library/route-exit';
+import { disposeLinkedGamePrefetch, restartLinkedGamePrefetch, startLinkedGamePrefetch } from '../features/library/prefetch';
+import { disposeGhostSidebarCleanup, installGhostSidebarCleanup } from '../features/library/sidebar-cleanup';
+import { withoutLibrarySidebarMutations } from '../steam/library-sidebar';
+import { installLibrarySidebarInteraction } from '../steam/sidebar-interaction';
+import { adoptExistingSteamWindows, getCanonicalDesktopPopup, isDesktopSteamWindow, resolveSteamWindowContext } from './existing-windows';
+import { installMappingRefresh } from './mapping-refresh';
+import { installArtworkBatchRefresh } from './artwork-batch-refresh';
+import { installBrowserProtection, disposeAllBrowserProtection } from '../steam/browser-protection';
+import { disposeTradingCardUI } from '../features/library/trading-cards';
+import { disposeCopiedFeedbackCleanup, scheduleCopiedFeedbackCleanup } from './copied-feedback';
+let mainWindowDoc: Document | null = null, appRuntimeLifecycle: DisposableRegistry | null = null;
+setLocalizationDocumentProvider(() => mainWindowDoc);
+const observedDocs = new WeakSet<Document>(), activeSteamDocuments = new Set<Document>(), documentLifecycles = new Set<DisposableRegistry>();
+function disposeDocumentLifecycles(): void {
+	for (const lifecycle of Array.from(documentLifecycles)) lifecycle.dispose();
+	documentLifecycles.clear();
+}
+function resolveMainWindowDocument(): Document | null {
+	if (!appRuntimeLifecycle || appRuntimeLifecycle.isDisposed) return null;
+	try {
+		const popup = getCanonicalDesktopPopup();
+		const { popupDoc: doc, popupName } = resolveSteamWindowContext(popup);
+		if (doc?.body && doc.defaultView && !doc.defaultView.closed && isDesktopSteamWindow(doc.defaultView, popupName) && !steamUIModeService.isGamepadUI(doc)) {
+			if (!observedDocs.has(doc)) windowCreated(popup);
+			mainWindowDoc = doc; activeSteamDocuments.add(doc); return doc;
+		}
+	} catch {}
+	if (mainWindowDoc && !mainWindowDoc.defaultView?.closed && mainWindowDoc.body && isDesktopSteamWindow(mainWindowDoc.defaultView) && !steamUIModeService.isGamepadUI(mainWindowDoc)) return mainWindowDoc;
+	for (const doc of activeSteamDocuments) {
+		if (doc?.body && doc.defaultView && !doc.defaultView.closed && isDesktopSteamWindow(doc.defaultView) && !steamUIModeService.isGamepadUI(doc)) {
+			mainWindowDoc = doc; return doc;
+		}
+	}
+	return null;
+}
+let hasHadBigPictureSession = false;
+function handleLibraryNavigation(doc: Document): void { disposeLocalAchievementsModal(doc); handleNativeLibraryNavigation(doc); }
+function handleBigPictureExit(): void {
+	const runtime = appRuntimeLifecycle;
+	if (!runtime || runtime.isDisposed) return;
+	const bpDoc = getBigPictureDocument();
+	if (bpDoc && bpDoc.body?.isConnected && !bpDoc.defaultView?.closed && steamUIModeService.isGamepadUI(bpDoc)) return;
+	if (isBigPictureActive()) deactivateBigPicture();
+	hasHadBigPictureSession = false;
+	const targetDoc = resolveMainWindowDocument();
+	if (targetDoc) {
+		finishLibraryRouteExit(targetDoc);
+		resetLibraryInjection(true, targetDoc);
+		syncDesktopLibraryHomePlaytimeDom(targetDoc);
+		void patchDesktopLibraryHomePlaytime(targetDoc).catch(() => {});
+	}
+	[60, 150, 350, 750, 1400].forEach(delay => runtime.timeout(() => {
+		if (runtime !== appRuntimeLifecycle) return;
+		const doc = resolveMainWindowDocument();
+		if (!doc || isBigPictureActive() || (bpDoc && bpDoc.body?.isConnected && !bpDoc.defaultView?.closed)) return;
+		finishLibraryRouteExit(doc);
+		if (!doc.getElementById(GDL_INJECTED) && !doc.getElementById('gdl-main-content-stack') && findNonSteamNotice(doc)) {
+			void tryInjectLibraryData(doc).catch(() => {});
+		}
+	}, delay));
+}
+function windowCreated(context: any): void {
+	const runtime = appRuntimeLifecycle; if (!runtime || runtime.isDisposed) return;
+	const { popupWin, popupDoc, popupName, popupTitle } = resolveSteamWindowContext(context);
+	if (!popupWin || !popupDoc) return;
+	if (!popupDoc.body) {
+		runtime.listen(popupWin, 'DOMContentLoaded', () => { if (runtime === appRuntimeLifecycle) windowCreated(context); }, { once: true });
+		[100, 400].forEach(delay => runtime.timeout(() => {
+			try { if (runtime === appRuntimeLifecycle && !popupWin.closed && popupWin.document?.body) windowCreated(context); } catch {}
+		}, delay));
+		return;
+	}
+	const isBigPictureWindow = /SP BPM|SP Big Picture|Big Picture|Gamepad/i.test(`${popupName} ${popupTitle}`);
+	const isOverlayWindow = /desktopoverlay|SP Overlay|Game Overlay/i.test(`${popupName} ${popupTitle}`);
+	const isMainWindow = isDesktopSteamWindow(popupWin, popupName) && !isBigPictureWindow && !isOverlayWindow;
+	const isPropertiesCandidate = /properties|propiedades|propriedades|propriétés|eigenschaften|proprietà|shortcut/i.test(popupTitle || popupDoc.title || '');
+	if (!isMainWindow && !isBigPictureWindow && !isOverlayWindow && !popupName && !isPropertiesCandidate) return;
+	if (observedDocs.has(popupDoc)) return;
+	observedDocs.add(popupDoc); activeSteamDocuments.add(popupDoc);
+	const isBigPictureSurface = (): boolean => {
+		if (isBigPictureWindow) return true;
+		if (steamUIModeService.isGamepadUI(popupDoc)) return true;
+		if (popupDoc.body && (popupDoc.body.classList.contains('GamepadUI') || popupDoc.body.classList.contains('gamepadui'))) return true;
+		if (/(?:gamepadui|bigpicture)/i.test(popupWin.location?.href || popupDoc.location?.href || '')) return true;
+		return false;
+	};
+	let lifecycle!: DisposableRegistry;
+	lifecycle = new DisposableRegistry(() => {
+		documentLifecycles.delete(lifecycle);
+		activeSteamDocuments.delete(popupDoc); observedDocs.delete(popupDoc);
+		if (mainWindowDoc === popupDoc) mainWindowDoc = null;
+	});
+	documentLifecycles.add(lifecycle);
+	// SP Desktop performs internal navigations while Steam rebuilds a shortcut.
+	// Its beforeunload/unload events are not proof that the visible CEF window is
+	// gone; disposing here permanently loses the observer until Steam restarts.
+	if (!isMainWindow) {
+		const disposeWindow = () => lifecycle.dispose();
+		lifecycle.listen(popupWin, 'beforeunload', disposeWindow, { once: true });
+		lifecycle.listen(popupWin, 'unload', disposeWindow, { once: true });
+	}
+	lifecycle.add(() => { disposeLocalAchievementUI(popupDoc); disposeCustomizationArtwork(popupDoc); disposeTradingCardUI(popupDoc); disposeGhostSidebarCleanup(popupDoc); disposeCopiedFeedbackCleanup(popupDoc); cancelPendingLibraryPaint(popupDoc); });
+	lifecycle.add(installBrowserProtection(popupWin, popupDoc));
+	const winTitle = `${popupName} ${popupTitle}`.trim();
+	if (isOverlayWindow || isBigPictureWindow || isMainWindow) {
+		registerNativeAchievementToastWindow(popupWin, isOverlayWindow ? 'overlay' : isBigPictureWindow ? 'bigpicture' : 'desktop', winTitle);
+		// Release retained notification windows at teardown, even without a later toast.
+		lifecycle.add(() => unregisterNativeAchievementToastWindow(popupWin));
+	}
+	if (isBigPictureWindow) {
+		hasHadBigPictureSession = true;
+		const onBpmClose = () => handleBigPictureExit();
+		lifecycle.listen(popupWin, 'beforeunload', onBpmClose, { once: true });
+		lifecycle.listen(popupWin, 'unload', onBpmClose, { once: true });
+		lifecycle.add(onBpmClose);
+		activateBigPicture(popupDoc);
+		// Keep achievement progress polling active when the game was launched
+		// from Big Picture. Persistent baselines suppress duplicate toasts if the
+		// desktop and Big Picture documents observe the same file change.
+		installLocalAchievementUI(popupDoc);
+	}
+	let earlyPlaybar: EarlyLinkedPlaybar | null = null;
+	if (isMainWindow) {
+		mainWindowDoc = popupDoc; lifecycle.add(installLegacyAchievementCacheRepair(popupDoc)); lifecycle.add(installNativeAchievementLayout(popupDoc));
+		lifecycle.add(installLibrarySidebarInteraction(popupDoc, true));
+		syncEarlyLinkedNotice(popupDoc);
+		syncDesktopLibraryHomePlaytimeDom(popupDoc);
+		lifecycle.add(installNativeArtworkWarmup(popupDoc));
+		earlyPlaybar = installEarlyLinkedPlaybar(popupDoc); if (!isBigPictureSurface()) syncLinkedFirstContent(popupDoc);
+		lifecycle.add(() => earlyPlaybar?.dispose());
+		void processPendingLinkJobs(mainWindowDoc);
+		installLocalAchievementUI(popupDoc);
+		scheduleCopiedFeedbackCleanup(popupDoc);
+		// A full CEF document replacement does require a new observer. Wait until
+		// the replacement document actually exists, then hand ownership over; do
+		// not tear the active observer down on Steam's earlier unload signal.
+		lifecycle.interval(() => {
+			try {
+				if (popupWin.closed) { lifecycle.dispose(); return; }
+				const liveDoc = popupWin.document;
+				if (liveDoc !== popupDoc && liveDoc?.body) {
+					lifecycle.dispose();
+					windowCreated({ window: popupWin, m_strName: popupName || 'SP Desktop', m_strTitle: popupTitle });
+				}
+			} catch {}
+		}, 1000);
+	}
+	let mutationTimer: ReturnType<typeof setTimeout> | null = null;
+	let playtimeTimer: ReturnType<typeof setTimeout> | null = null;
+	let lastPlaytimeRefreshAt = 0;
+	let lastBigPictureRefreshAt = 0;
+	let lastMutationInjectionAt = 0;
+	lifecycle.add(() => {
+		if (mutationTimer) clearTimeout(mutationTimer); if (playtimeTimer) clearTimeout(playtimeTimer);
+		mutationTimer = null; playtimeTimer = null;
+	});
+	let lastNavUrl = libraryRouteIdentity(popupDoc);
+	const schedulePlaytimeRefresh = (immediate = false): void => {
+		if (!isMainWindow || popupDoc.hidden || playtimeTimer || !isDesktopLibraryHomePlaytimeVisible(popupDoc)) return;
+		const elapsed = Date.now() - lastPlaytimeRefreshAt;
+		const delay = immediate ? 0 : Math.max(0, 10000 - elapsed);
+		playtimeTimer = setTimeout(() => {
+			playtimeTimer = null;
+			lastPlaytimeRefreshAt = Date.now();
+			if (isDesktopLibraryHomePlaytimeVisible(popupDoc)) void patchDesktopLibraryHomePlaytime(popupDoc).catch(e => backendLog('Desktop Library playtime refresh error: ' + e));
+		}, delay);
+	};
+	let wasBigPictureSurface = isBigPictureSurface();
+	const runInjection = (reason: 'startup' | 'navigation' | 'mutation' | 'visibility' | 'watchdog' = 'mutation', earlyPlaybarAlreadySynced = false) => {
+		if (reason === 'mutation') lastMutationInjectionAt = Date.now();
+		const currentIsBigPicture = isBigPictureSurface();
+		if (wasBigPictureSurface && !currentIsBigPicture) {
+			wasBigPictureSurface = false;
+			if (getBigPictureDocument() === popupDoc) handleBigPictureExit();
+		}
+		if (!wasBigPictureSurface && currentIsBigPicture) {
+			wasBigPictureSurface = true;
+			hasHadBigPictureSession = true;
+		}
+		// This precedes the static main-window branch because Steam reuses that document.
+		if (currentIsBigPicture) {
+			if (isPublicSteamLibraryRoute(popupDoc) && !popupDoc.getElementById('gdl-bp-detail-root') && !popupDoc.getElementById('gdl-bp-playbar-controller')) {
+				return;
+			}
+			activateBigPicture(popupDoc);
+			lastBigPictureRefreshAt = Date.now();
+			void refreshBigPicture(popupDoc).catch(e => backendLog('Big Picture refresh error: ' + e));
+			return;
+		}
+		if (isMainWindow) {
+			// Properties/Personalización live in dedicated popup documents. Running
+			// their full-text/DOM scanners against SP Desktop on every Library
+			// mutation created needless startup work and retained large React trees.
+			// Keep desktop injection restricted to actual Library surfaces.
+			// Native metadata, controls and layout remain entirely Steam-owned.
+			if (isPublicSteamLibraryRoute(popupDoc)) {
+				if (hasOwnedLibraryChrome(popupDoc)) {
+					void tryInjectLibraryData(popupDoc).catch(e => backendLog('Library route retirement error: ' + e));
+				}
+				return;
+			}
+			if (!earlyPlaybarAlreadySynced) earlyPlaybar?.sync();
+			void tryInjectLibraryData(popupDoc).catch(e => backendLog('Library injection error: ' + e));
+			schedulePlaytimeRefresh(reason !== 'mutation');
+			return;
+		}
+		// Shortcut-only fields exist only in Properties popups. Never run the
+		// full text walker against the desktop Library or Big Picture documents.
+		// Taiga Launcher: jogo da Steam, artes e conquistas são definidos no Taiga Launcher ao adicionar o jogo; a janela
+		// Propriedades da Steam fica como a Steam fez (sem campos de AppID, simulação ou SteamGridDB).
+		if ((window as any).__TAIGA_NGL_HOST__ || (window as any).__TAIGA_CATALOG__) return;
+		tryInjectPropertiesField(popupDoc, popupTitle);
+		tryInjectCustomizationArtwork(popupDoc, popupTitle);
+	};
+	const isGdlOnlyMutation = (record: MutationRecord): boolean => mutationIsWithinSelector(record,
+		'[id^="gdl-"], [data-gdl-hidden], [data-gdl-shortcut-app-id], [data-gdl-cloud-status], [data-gdl-cloud-stats], [data-gdl-playtime]');
+	// URL/DOM routes outrank pointerdown on an already-selected row and prevent cleanup flicker.
+	const observer = new MutationObserver((mutations) => {
+		const records = (isMainWindow ? withoutLibrarySidebarMutations(mutations) : mutations).filter(record => !isGdlOnlyMutation(record));
+		if (isMainWindow) {
+			const roots = records.flatMap(record => Array.from(record.addedNodes));
+			if (roots.length > 0) scheduleCopiedFeedbackCleanup(popupDoc, roots);
+		}
+		const currentUrl = libraryRouteIdentity(popupDoc);
+		if (currentUrl && currentUrl !== lastNavUrl) {
+			lastNavUrl = currentUrl;
+			if (mutationTimer) { clearTimeout(mutationTimer); mutationTimer = null; }
+			if (isMainWindow) {
+				handleLibraryNavigation(popupDoc);
+				earlyPlaybar?.sync();
+			}
+			runInjection('navigation', isMainWindow);
+			return;
+		}
+		if (records.length === 0) return;
+		if (isMainWindow && !isBigPictureSurface()) syncLinkedFirstContent(popupDoc);
+		if (isMainWindow && isPublicSteamLibraryRoute(popupDoc)) {
+			// Steam may reveal its native links row before updating the route URL.
+			// Retire only stale gdl-* nodes and ignore the rest of this mutation.
+			runInjection('mutation');
+			return;
+		}
+		// Playbar content and visibility have their own synchronous, scoped
+		// observer. Keep this metadata observer out of its update cycle.
+		if (isMainWindow) {
+			const playtimeRoots = records.flatMap(record => [record.target, ...Array.from(record.addedNodes)]);
+			if (mutationMayContainDesktopPlaytime(playtimeRoots)) syncDesktopLibraryHomePlaytimeDom(popupDoc);
+		}
+		// Rendering a linked page creates several DOM mutations of its own. They
+		// are already complete, so feeding them back into the navigation observer
+		// used to schedule redundant injection/cleanup passes and visible flicker.
+		const addedRoots = records.flatMap(record => Array.from(record.addedNodes));
+		if (mutationMayContainNonSteamNotice(addedRoots) || mutationMayContainProperties(addedRoots)) {
+			if (mutationTimer) { clearTimeout(mutationTimer); mutationTimer = null; }
+			runInjection('mutation');
+			return;
+		}
+		if (mutationTimer) return;
+		const bigPictureSurface = isBigPictureSurface();
+		if (bigPictureSurface && isPublicSteamLibraryRoute(popupDoc) && !popupDoc.getElementById('gdl-bp-detail-root') && !popupDoc.getElementById('gdl-bp-playbar-controller')) {
+			return;
+		}
+		const delay = Math.max(bigPictureSurface ? 250 : 140, (bigPictureSurface ? 500 : 350) - (Date.now() - lastMutationInjectionAt));
+		mutationTimer = setTimeout(() => { mutationTimer = null; runInjection('mutation'); }, delay);
+	});
+	lifecycle.observe(observer, popupDoc.body, { childList: true, subtree: true });
+	lifecycle.listen(popupDoc, 'visibilitychange', () => {
+		if (popupDoc.hidden) { cancelPendingLibraryPaint(popupDoc); return; }
+		try {
+			const currentUrl = libraryRouteIdentity(popupDoc);
+			let earlyPlaybarAlreadySynced = false;
+			if (currentUrl && currentUrl !== lastNavUrl) {
+				lastNavUrl = currentUrl;
+				if (isMainWindow) { handleLibraryNavigation(popupDoc); earlyPlaybar?.sync(); earlyPlaybarAlreadySynced = true; }
+			}
+			runInjection('visibility', earlyPlaybarAlreadySynced);
+		} catch {}
+	});
+	lifecycle.interval(() => {
+		try {
+			if (popupDoc.hidden) return;
+			const currentUrl = libraryRouteIdentity(popupDoc);
+			if (!currentUrl || currentUrl === lastNavUrl) return;
+			lastNavUrl = currentUrl;
+			if (mutationTimer) { clearTimeout(mutationTimer); mutationTimer = null; }
+			if (isMainWindow) { handleLibraryNavigation(popupDoc); earlyPlaybar?.sync(); }
+			runInjection('navigation', isMainWindow);
+		} catch {}
+	}, 2500);
+	// Keep the shim alive while Big Picture replaces its app overview tree.
+	let refreshInterval: ReturnType<typeof setInterval> | null = null;
+	lifecycle.add(() => { if (refreshInterval) clearInterval(refreshInterval); refreshInterval = null; });
+	if (isBigPictureWindow || isMainWindow) {
+		refreshInterval = setInterval(() => {
+			try {
+				if (popupWin.closed || !popupDoc.body) {
+					if (refreshInterval) clearInterval(refreshInterval);
+					if (getBigPictureDocument() === popupDoc) deactivateBigPicture();
+					return;
+				}
+				if (!isBigPictureSurface() || popupDoc.hidden || Date.now() - lastBigPictureRefreshAt < 14000) {
+					if (!isBigPictureSurface() && (isBigPictureActive() || hasHadBigPictureSession) && getBigPictureDocument() === popupDoc) {
+						handleBigPictureExit();
+					}
+					return;
+				}
+				runInjection('watchdog');
+			} catch (e) {
+				backendLog('Big Picture refresh error: ' + e);
+			}
+		}, 15000);
+	}
+	const isPropertiesWindow = !isMainWindow && /properties|propiedades|propriedades|propriétés|eigenschaften|proprietà|shortcut/i.test(popupTitle || popupDoc.title || '');
+	const linkedShortcutAlreadyVisible = (isMainWindow && Boolean(findNonSteamNotice(popupDoc))) || isPropertiesWindow;
+	lifecycle.timeout(() => runInjection('startup'), linkedShortcutAlreadyVisible ? 0 : 350);
+}
+function safeStartup(label: string, action: () => void): void {
+	try { action(); }
+	catch (error) {
+		console.error(`[GDL] Startup step failed (${label}):`, error);
+		try { backendLog(`[NGL][Startup] ${label} failed: ${String(error)}`); } catch {}
+	}
+}
+export default definePlugin(() => {
+	const runtimeLifecycle = new DisposableRegistry();
+	appRuntimeLifecycle = runtimeLifecycle;
+	const isCurrentRuntime = (): boolean => !runtimeLifecycle.isDisposed && appRuntimeLifecycle === runtimeLifecycle;
+	const startupStartedAt = typeof performance !== 'undefined' ? performance.now() : Date.now();
+	const deferStartup = (label: string, action: () => void, delay = 0): void => { if (isCurrentRuntime()) runtimeLifecycle.timeout(() => safeStartup(label, action), delay); };
+	console.log('[GDL] definePlugin callback executing - returning plugin UI before background hydration');
+	installBrowserProtection(window, window.document);
+	safeStartup('cache protection', () => setProtectedCacheAppIds(Object.values(mappings)));
+	deferStartup('cache pruning', () => pruneCacheStorage(), 750);
+	safeStartup('library runtime host', () => configureLibraryRuntimeHost({
+		getMainWindowDoc: () => resolveMainWindowDocument(),
+		waitForNativeArtwork: (doc, ready) => waitForNativeArtwork(doc, ready, () => syncLinkedFirstContent(doc)),
+		prepareLinkedPage: (doc) => {
+			syncDesktopLibraryHomePlaytimeDom(doc);
+			captureNativeUiBlueprints(doc, { skip: () => Boolean(findNonSteamNotice(doc) || doc.getElementById(GDL_INJECTED)) });
+		},
+	}));
+	safeStartup('achievement runtime host', () => configureAchievementRuntimeHost({
+		getCurrentInjectedAppId, getCurrentInjectedShortcutAppId,
+		findNonSteamNotice: (doc) => { const info = findNonSteamNotice(doc); return info ? { title: info.title } : null; },
+		findActiveShortcutAppId,
+	}));
+	safeStartup('shortcut runtime host', () => configureShortcutRuntimeHost({
+		getMainWindowDoc: () => resolveMainWindowDocument(),
+		getSteamDocuments: () => Array.from(activeSteamDocuments).filter(doc => {
+			try { return Boolean(doc?.body && doc.defaultView && !doc.defaultView.closed); } catch { return false; }
+		}),
+		refreshLibraryArtwork, resetLibraryInjection,
+		findNonSteamNotice: (doc) => { const info = findNonSteamNotice(doc); return info ? { title: info.title } : null; },
+		isLibraryActive: (doc) => { const target = doc || resolveMainWindowDocument(); return Boolean(target && (findNonSteamNotice(target) || isSteamLibraryActive(target))); },
+		runPendingLinkJobs: () => { void processPendingLinkJobs(resolveMainWindowDocument()); },
+	}));
+	// DOM/registry scans start only after Millennium can render the plugin card.
+	deferStartup('native add detector', () => startNativeAddAutoDetector(), 1200);
+	safeStartup('social runtime host', () => configureSocialRuntimeHost({ getCurrentInjectedAppId, getCurrentInjectedShortcutAppId }));
+	if (Object.keys(mappings).length > 0) backendLog('Instant startup mapping snapshot: ' + Object.keys(mappings).length + ' entrie(s)');
+	let unsubscribeUIMode = (): void => {};
+	deferStartup('Steam UI mode service', () => {
+		steamUIModeService.initialize();
+		unsubscribeUIMode = steamUIModeService.subscribe((state) => {
+			if (state.isGamepadUI) {
+				hasHadBigPictureSession = true;
+				const doc = getBigPictureDocument() || resolveMainWindowDocument();
+				if (doc) void refreshBigPicture(doc).catch(error => backendLog('Big Picture mode refresh error: ' + error));
+				return;
+			}
+			if (state.isDesktop && (isBigPictureActive() || hasHadBigPictureSession)) handleBigPictureExit();
+		});
+	}, 0);
+	deferStartup('legacy cache cleanup', () => { try { for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && (k.startsWith('events8_') || k.startsWith('events7_') || k.startsWith('friends_') || k.startsWith('gdl_cache_friends_') || k === 'gdl_info_panel_expanded' || k === 'gdl_native_info_panel_expanded')) localStorage.removeItem(k); } } catch {} }, 300);
+	const hydrateMappingsAfterMount = (): void => { void loadMappings().then(() => {
+		if (!isCurrentRuntime()) return;
+		backendLog('Loaded ' + Object.keys(mappings).length + ' mapping(s)');
+		warmupAllMappedGameData();
+		warmupAllMappedLibraryAssets(Object.values(mappings).filter(v => typeof v === 'string' && /^\d+$/.test(v)));
+		// Keep the first paint cheap. None of these background services is needed
+		// to render the Millennium plugin card, so stagger them after hydration.
+		deferStartup('playtime tracker', () => startPlaytimeTracker(), 700);
+		deferStartup('achievement launch watcher', () => startFirstLaunchAchievementWatcher(), 1100);
+		deferStartup('linked game prefetch', () => startLinkedGamePrefetch(getCurrentInjectedAppId), 1600);
+		void processPendingLinkJobs(mainWindowDoc);
+		const targetDoc = resolveMainWindowDocument();
+		if (targetDoc) {
+			installEarlyLinkedPlaybar(targetDoc).sync();
+			installGhostSidebarCleanup(targetDoc);
+			tryInjectLibraryData(targetDoc).catch(e => backendLog('Post-startup library refresh error: ' + e));
+		}
+		const bigPictureDoc = getBigPictureDocument();
+		if (bigPictureDoc) void refreshBigPicture(bigPictureDoc).catch(e => backendLog('Big Picture refresh error: ' + e));
+		// Viewing the Library must not rewrite shortcut identity, icons or grid
+		// files. Those writes belong to linking and explicit artwork actions.
+	}).catch((e) => {
+		if (!isCurrentRuntime()) return;
+		console.error('[GDL] Failed to load mappings from backend:', e);
+		deferStartup('playtime tracker fallback', () => startPlaytimeTracker(), 700);
+		deferStartup('achievement watcher fallback', () => startFirstLaunchAchievementWatcher(), 1100);
+	}); };
+	deferStartup('mapping hydration', hydrateMappingsAfterMount, 0);
+	let disposeMappingRefresh = (): void => {};
+	try { disposeMappingRefresh = installMappingRefresh({
+		getCurrentAppId: getCurrentInjectedAppId,
+		getCurrentShortcutAppId: getCurrentInjectedShortcutAppId,
+		resetLibrary: () => resetLibraryInjection(true),
+		refreshBigPicture: () => { const doc = getBigPictureDocument(); if (doc) void refreshBigPicture(doc).catch(() => {}); },
+	}); } catch (error) { console.error('[GDL] Mapping refresh startup failed:', error); }
+	const disposeArtworkBatchRefresh = installArtworkBatchRefresh(getCurrentInjectedAppId, () => resetLibraryInjection(true));
+	const onPlaytimeChanged = (): void => {
+		const doc = resolveMainWindowDocument();
+		if (doc) {
+			installEarlyLinkedPlaybar(doc).sync();
+			void patchDesktopLibraryHomePlaytime(doc).catch(() => {});
+			void tryInjectLibraryData(doc).catch(() => {});
+		}
+		const bigPictureDoc = getBigPictureDocument();
+		if (bigPictureDoc) void refreshBigPicture(bigPictureDoc).catch(() => {});
+	};
+	window.addEventListener('gdl:playtime-changed', onPlaytimeChanged);
+	let unsubscribeLanguageRefresh = (): void => {};
+	try { unsubscribeLanguageRefresh = subscribeSteamLanguageChange((language, previousLanguage) => {
+		if (!previousLanguage || previousLanguage === language) return;
+		clearGameDataCache(); clearCommunityItemCaches(); clearSocialRuntimeCaches();
+		clearLibraryAssetCaches(); clearShortcutDetectionCache(); clearShortcutRuntimeCaches();
+		clearLocalAchievementCache(false); clearNativeUiBlueprints(); restartLinkedGamePrefetch(); resetLibraryInjection(true);
+		const bigPictureDoc = getBigPictureDocument();
+		if (bigPictureDoc) void refreshBigPicture(bigPictureDoc).catch(() => {});
+	}); } catch (error) { console.error('[GDL] Language subscription failed:', error); }
+	deferStartup('language watcher', () => startSteamLanguageWatcher(), 500);
+	deferStartup('Steam language hydration', () => { void getSteamLanguage(true).catch(() => {}); }, 50);
+	try { Millennium.AddWindowCreateHook(context => { if (isCurrentRuntime()) windowCreated(context); }); } catch (e) { console.error('[GDL] Failed to register window hook:', e); }
+	const existingWindowAdoptionTimers = [0, 150, 400, 1000, 2500, 5000, 8000].map(delay => runtimeLifecycle.timeout(() => {
+		if (!isCurrentRuntime()) return;
+		try { adoptExistingSteamWindows(windowCreated); } catch (e) { console.error('[GDL] Failed to adopt existing Steam windows:', e); }
+	}, delay));
+	const adoptionInterval = runtimeLifecycle.interval(() => { if (!isCurrentRuntime()) return; try { adoptExistingSteamWindows(windowCreated); } catch {} }, 3000);
+	// Taiga Launcher: o programa avisa quando o catálogo/vínculos mudam (jogo adicionado, AppID trocado, idioma).
+	(window as any).__TAIGA_NGL_REFRESH__ = (): void => {
+		if (!isCurrentRuntime()) return;
+		void loadMappings().then(() => {
+			if (!isCurrentRuntime()) return;
+			clearGameDataCache(); clearLibraryAssetCaches(); clearLocalAchievementCache(false);
+			resetLibraryInjection(true);
+			const bigPictureDoc = getBigPictureDocument();
+			if (bigPictureDoc) void refreshBigPicture(bigPictureDoc).catch(() => {});
+		}).catch(() => {});
+	};
+	console.log(`[GDL][Startup] Plugin descriptor ready in ${Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startupStartedAt)}ms; background services deferred.`);
+	return {
+		title: 'Taiga Launcher',
+		icon: <IconsModule.Settings />,
+		content: <SettingsContent clearAchievementCache={clearLocalAchievementCache} showAchievementToast={showAchievementToast} />,
+		onDismount: () => {
+			if (runtimeLifecycle.isDisposed) return; runtimeLifecycle.dispose();
+			if (appRuntimeLifecycle !== runtimeLifecycle) return; appRuntimeLifecycle = null;
+			clearInterval(adoptionInterval);
+			disposeArtworkBatchRefresh();
+			window.removeEventListener('gdl:playtime-changed', onPlaytimeChanged);
+			for (const timer of existingWindowAdoptionTimers) clearTimeout(timer);
+			disposeDocumentLifecycles(); unsubscribeLanguageRefresh(); unsubscribeUIMode();
+			steamUIModeService.dispose(); disposeMappingRefresh(); disposeLinkedGamePrefetch();
+			stopSteamLanguageWatcher(); stopNativeAddAutoDetector(); stopPlaytimeTracker();
+			stopFirstLaunchAchievementWatcher(); deactivateBigPicture(); hasHadBigPictureSession = false; gamepadRuntime.invalidate(); disposeLibraryRuntime();
+			disposeAchievementRuntime(); clearNativeUiBlueprints(); resetResolvedCssClassModules();
+			steamComponents.clearCache(); disposeAllBrowserProtection();
+		},
+	};
+});

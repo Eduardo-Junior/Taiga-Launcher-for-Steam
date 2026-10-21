@@ -1,0 +1,82 @@
+Taiga Launcher
+Copyright 2026 Taiga (GabrielTaiga)
+https://github.com/GabrielTaiga
+
+Criado por Taiga. Created by Taiga.
+
+Este programa é livre para usar, estudar, modificar e distribuir sob a Apache License 2.0 (arquivo LICENSE).
+Quem distribuir o programa ou uma versão baseada nele DEVE manter este arquivo NOTICE e dar os créditos ao
+autor original de forma visível, por exemplo: "Baseado no Taiga Launcher, criado por Taiga (GabrielTaiga)".
+Versões modificadas devem dizer que foram alteradas e não podem usar o nome ou o ícone do Taiga Launcher
+como se fossem a versão oficial.
+
+This software is free to use, study, modify and distribute under the Apache License 2.0 (see LICENSE).
+Anyone who distributes it, or a work based on it, MUST keep this NOTICE file and visibly credit the
+original author, for example: "Based on Taiga Launcher, created by Taiga (GabrielTaiga)".
+Modified versions must state that they were changed and must not use the Taiga Launcher name or icon
+as if they were the official release.
+
+-----------------------------------------------------------------------------------------------------
+Componentes de terceiros incluídos / Third-party components included
+-----------------------------------------------------------------------------------------------------
+
+NativeGameLink for Steam 4.0.3
+  Copyright (c) 2026 David Miranda (Davidjarod11). MIT License.
+  Steam game page (resources/app/steam/ngl.bundle.js, source in third_party/nativegamelink),
+  modified by Taiga Launcher. License: resources/app/licenses/NativeGameLink-MIT.txt
+
+Electron
+  Copyright (c) Electron contributors, Copyright (c) 2013-2020 GitHub Inc. MIT License.
+  License: resources/app/licenses/Electron-MIT.txt
+
+Chromium
+  Copyright The Chromium Authors. Various licenses: LICENSES.chromium.html
+
+QR Code Generator
+  Copyright (c) 2009 Kazuhiko Arase. MIT License.
+  resources/app/web/qrcode.js. License: resources/app/licenses/qrcode-generator-MIT.txt
+
+Manrope and Sora fonts
+  SIL Open Font License 1.1. resources/app/web/fonts/*-OFL.txt
+
+-----------------------------------------------------------------------------------------------------
+Agradecimentos e projetos de referência / Acknowledgements and reference projects
+-----------------------------------------------------------------------------------------------------
+
+Projects studied while building Taiga Launcher (ideas and approach; their code is not included unless
+listed in the components above). Thank you to their authors:
+
+  Millennium, Project Millennium (github.com/SteamClientHomebrew/Millennium), MIT
+    Steam client integration through the CEF debugging port.
+  SFP, Chris Yeninas / PhantomGamers (github.com/PhantomGamers/SFP), MIT
+    Steam launch arguments and script injection approach.
+  BoilR, PhilipK (github.com/PhilipK/BoilR), MIT / Apache-2.0
+    Importing games from other launchers into Steam.
+  Playhub Metadata, LoZazaMastro (github.com/LoZazaMastro/Playhub-Metadata)
+    Metadata and artwork for non-Steam games.
+  Steam Achievement Notifier (github.com/SteamAchievementNotifier/SteamAchievementNotifier)
+    Achievement notifications.
+
+Acknowledged by NativeGameLink for Steam, whose work is part of the Steam game page:
+  game-data-linker, retrotoolsdev-wq (github.com/retrotoolsdev-wq/game-data-linker), MIT
+  SteamAchievementManager, gibbed (github.com/gibbed/SteamAchievementManager)
+  Achievement-Watcher, xan105 (github.com/xan105/Achievement-Watcher)
+  steam-non-steam-playtimes, k0d13 (github.com/k0d13/steam-non-steam-playtimes)
+
+-----------------------------------------------------------------------------------------------------
+Dados e serviços usados durante o uso (não redistribuídos com o programa)
+Data and services used at runtime (not redistributed with the program)
+-----------------------------------------------------------------------------------------------------
+
+SteamGridDB (artwork, steamgriddb.com) · IGDB by Twitch (game information, igdb.com)
+RetroAchievements (achievements, retroachievements.org) · libretro-thumbnails and libretro-database
+(covers and Redump/No-Intro identification, github.com/libretro) · Wikipedia and Wikidata (descriptions
+under CC BY-SA 4.0 and data under CC0, wikipedia.org / wikidata.org) · PCGamingWiki (pcgamingwiki.com)
+· Exophase (trophy lists, exophase.com) · Steam Store (Valve) · Microsoft Translator, Google Translate
+and MyMemory (automatic translation).
+Emulators downloaded on request (PCSX2, RPCS3, Vita3K, Xenia, mGBA, BizHawk, ares, Stella and others) come
+from each project's official release page and keep their own licenses; none is bundled with Taiga Launcher.
+
+Each service keeps its own terms. Taiga Launcher is not affiliated with Valve, Sony, Microsoft,
+Epic Games, GOG, Nintendo, SteamGridDB, Twitch/IGDB, RetroAchievements, Exophase or the Wikimedia
+Foundation. All trademarks belong to their owners.

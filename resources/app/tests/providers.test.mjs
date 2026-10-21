@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {Providers} from '../lib/providers.mjs';
+import {normalize} from '../lib/files.mjs';
+test('Missing API credentials are optional: no nagging errors, free sources instead',async()=>{const p=new Providers(()=>({}),'/tmp/unused');const r=await p.candidates('Dragon Ball Z Shin Budokai');assert.equal(r.errors.length,0,'1.6.0: sem chaves, sem avisos, usa fontes gratuitas');assert.deepEqual(r.sgdb,[]);assert.deepEqual(r.free,[]);});
+test('PSP title punctuation and trademarks do not prevent exact matching',async t=>{const dir=fs.mkdtempSync(path.join(os.tmpdir(),'taiga-providers-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));const p=new Providers(()=>({sgdbKey:'mock',igdbId:'mock',igdbSecret:'mock',raKey:'mock'}),dir);let query='';p.sg=async()=>[{id:1,name:'Dragon Ball Z: Shin Budokai'}];p.ig=async q=>{query=q;return [{id:2,name:'Dragon Ball Z: Shin Budokai',summary:'PSP game'}];};p.ra=async()=>[{ID:3,Title:'Dragon Ball Z: Shin Budokai'}];const r=await p.candidates('Dragon Ball Z™ Shin Budokai');assert.equal(r.errors.length,0);assert.equal(r.ra.length,1);assert.equal(normalize(r.igdb[0].name),normalize('Dragon Ball Z Shin Budokai'));assert.ok(!query.includes('™'));assert.ok(query.includes('platforms = (38)'));});
+test('IGDB artwork fallback and provider failures remain explicit',async()=>{const p=new Providers(()=>({}),'/tmp/unused');p.translate=async text=>text;p.image=async url=>{assert.equal(url,'https://images.igdb.com/igdb/image/upload/t_cover_big/a.jpg');return 'mock.jpg';};const g={};assert.deepEqual(await p.enrich(g,{igdb:{id:1,name:'Game',summary:'Description',cover:{url:'//images.igdb.com/igdb/image/upload/t_thumb/a.jpg'}}}),[]);assert.equal(g.art.cover,'mock.jpg');assert.equal(g.metadata.summary,'Description');p.sg=async()=>[];const warnings=await p.enrich(g,{sgdb:{id:2}});assert.ok(warnings.some(w=>w.includes('nenhuma capa')));});
