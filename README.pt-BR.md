@@ -9,9 +9,9 @@
   Capa, página do jogo completa, conquistas com a notificação nativa da Steam e tempo de jogo. Sem plugins e sem configuração.
 </p>
 
-<h3 align="center">
-  <a href="https://github.com/GabrielTaiga/Taiga-Launcher/releases/latest">⬇️ Baixar</a>
-</h3>
+<p align="center">
+  <a href="https://github.com/GabrielTaiga/Taiga-Launcher/releases/latest"><img src="https://img.shields.io/badge/Baixar-e0353d?style=for-the-badge&logo=windows&logoColor=white" height="60" alt="Baixar"></a>
+</p>
 
 <p align="center">
   <a href="README.md">English</a> ·
@@ -37,6 +37,9 @@
 ---
 
 ## 📸 Imagens
+
+### Página de um jogo fora da Steam sem o programa ativado
+<img src="https://i.imgur.com/fWZLBqc.png" alt="Página de um jogo fora da Steam sem o programa ativado">
 
 ### Jogos de emulador e de outras lojas dentro da Steam
 <img src="https://i.imgur.com/rvg56nz.png" alt="Jogos de emulador e de outras lojas dentro da Steam">
@@ -70,6 +73,9 @@
 
 ### Personalize as capas direto no programa
 <img src="https://i.imgur.com/cY4pZbQ.png" alt="Personalize as capas direto no programa">
+
+### Veja seus emuladores
+<img src="https://i.imgur.com/U4HKCdE.png" alt="Veja seus emuladores">
 
 ---
 

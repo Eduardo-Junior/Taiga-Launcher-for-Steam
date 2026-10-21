@@ -9,9 +9,9 @@
   Cover, vollständige Spielseite, Erfolge mit der nativen Steam-Benachrichtigung und Spielzeit. Ohne Plugins, ohne Einrichtung.
 </p>
 
-<h3 align="center">
-  <a href="https://github.com/GabrielTaiga/Taiga-Launcher/releases/latest">⬇️ Herunterladen</a>
-</h3>
+<p align="center">
+  <a href="https://github.com/GabrielTaiga/Taiga-Launcher/releases/latest"><img src="https://img.shields.io/badge/Herunterladen-e0353d?style=for-the-badge&logo=windows&logoColor=white" height="60" alt="Herunterladen"></a>
+</p>
 
 <p align="center">
   <a href="README.md">English</a> ·
@@ -37,6 +37,9 @@
 ---
 
 ## 📸 Screenshots
+
+### Seite eines Nicht-Steam-Spiels ohne aktives Programm
+<img src="https://i.imgur.com/fWZLBqc.png" alt="Seite eines Nicht-Steam-Spiels ohne aktives Programm">
 
 ### Emulator- und Store-Spiele direkt in Steam
 <img src="https://i.imgur.com/rvg56nz.png" alt="Emulator- und Store-Spiele direkt in Steam">
@@ -70,6 +73,9 @@
 
 ### Cover direkt im Programm anpassen
 <img src="https://i.imgur.com/cY4pZbQ.png" alt="Cover direkt im Programm anpassen">
+
+### Sieh dir deine Emulatoren an
+<img src="https://i.imgur.com/U4HKCdE.png" alt="Sieh dir deine Emulatoren an">
 
 ---
 

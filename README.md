@@ -9,9 +9,9 @@
   Covers, a complete game page, achievements with the native Steam popup and playtime. No plugins, no setup.
 </p>
 
-<h3 align="center">
-  <a href="https://github.com/GabrielTaiga/Taiga-Launcher/releases/latest">⬇️ Download</a>
-</h3>
+<p align="center">
+  <a href="https://github.com/GabrielTaiga/Taiga-Launcher/releases/latest"><img src="https://img.shields.io/badge/Download-e0353d?style=for-the-badge&logo=windows&logoColor=white" height="60" alt="Download"></a>
+</p>
 
 <p align="center">
   <b>English</b> ·
@@ -37,6 +37,9 @@
 ---
 
 ## 📸 Screenshots
+
+### A non-Steam game page without the program running
+<img src="https://i.imgur.com/fWZLBqc.png" alt="A non-Steam game page without the program running">
 
 ### Emulator and other-store games inside Steam
 <img src="https://i.imgur.com/rvg56nz.png" alt="Emulator and other-store games inside Steam">
@@ -70,6 +73,9 @@
 
 ### Customize covers right in the app
 <img src="https://i.imgur.com/cY4pZbQ.png" alt="Customize covers right in the app">
+
+### See your emulators
+<img src="https://i.imgur.com/U4HKCdE.png" alt="See your emulators">
 
 ---
 
