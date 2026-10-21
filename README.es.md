@@ -9,19 +9,16 @@
   Portada, página del juego completa, logros con la notificación nativa de Steam y tiempo de juego. Sin plugins y sin configuración.
 </p>
 
+<h3 align="center">
+  <a href="https://github.com/GabrielTaiga/Taiga-Launcher/releases/latest">⬇️ Descargar</a>
+</h3>
+
 <p align="center">
   <a href="README.md">English</a> ·
   <a href="README.pt-BR.md">Português (Brasil)</a> ·
   <b>Español</b> ·
   <a href="README.fr.md">Français</a> ·
   <a href="README.de.md">Deutsch</a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/GabrielTaiga/taiga-launcher/releases/latest"><img src="https://img.shields.io/github/v/release/GabrielTaiga/taiga-launcher?label=descargar&style=for-the-badge&color=e0353d" alt="Descargar"></a>
-  <img src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078d4?style=for-the-badge&logo=windows" alt="Windows 10 y 11">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/licencia-Apache%202.0-555?style=for-the-badge" alt="Apache 2.0"></a>
-  <a href="https://github.com/sponsors/GabrielTaiga"><img src="https://img.shields.io/badge/apoyar-GitHub-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Apoyar"></a>
 </p>
 
 ---
@@ -53,8 +50,8 @@
 ### Los juegos cuentan en el total de tu biblioteca de Steam
 <img src="https://i.imgur.com/ZT5MEqG.png" alt="Los juegos cuentan en el total de tu biblioteca de Steam">
 
-### Tus juegos en la colección de Taiga Launcher
-<img src="https://i.imgur.com/J45O3bz.png" alt="Tus juegos en la colección de Taiga Launcher">
+### Tus juegos en tu colección de Steam
+<img src="https://i.imgur.com/J45O3bz.png" alt="Tus juegos en tu colección de Steam">
 
 ### Mira y edita toda la información del juego
 <img src="https://i.imgur.com/sCl5Pu1.png" alt="Mira y edita toda la información del juego">
@@ -133,7 +130,7 @@ PPSSPP, PCSX2, DuckStation, ePSXe, RPCS3, Vita3K, shadPS4, Dolphin, Cemu, Ryujin
 
 ## 📥 Instalación
 
-1. Descarga el `.zip` de la **[última versión](https://github.com/GabrielTaiga/taiga-launcher/releases/latest)**.
+1. Descarga el `.zip` de la **[última versión](https://github.com/GabrielTaiga/Taiga-Launcher/releases/latest)**.
 2. Extrae la carpeta completa donde quieras (por ejemplo `C:\Juegos\Taiga Launcher`). No separes el `.exe` del resto de archivos.
 3. Abre **Taiga Launcher.exe**. Un asistente rápido te pide el idioma, la cuenta de Steam y dónde están tus juegos.
 
@@ -163,7 +160,7 @@ En `%LOCALAPPDATA%\Taiga Launcher`. Puedes mover o reemplazar la carpeta del pro
 Usa **Configuración › Probar integración**. Revisa cada parte y te dice qué arreglar.
 
 **Encontré un error.**
-Usa **Informar un problema** en el menú lateral o abre un [issue](https://github.com/GabrielTaiga/taiga-launcher/issues).
+Usa **Informar un problema** en el menú lateral o abre un [issue](https://github.com/GabrielTaiga/Taiga-Launcher/issues).
 
 ---
 
