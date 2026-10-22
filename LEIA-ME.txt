@@ -68,7 +68,7 @@ Onde ficam meus dados?
 
 O programa mexe nos meus jogos ou nas minhas contas?
   Não. Ele só cria atalhos na Steam e lê arquivos de progresso. Nas contas
-  (Epic, GOG, Xbox, PlayStation, RetroAchievements) ele só lê conquistas.
+  (Epic, GOG, Xbox, RetroAchievements) ele só lê conquistas.
   Os logins ficam cifrados pelo próprio Windows.
 
 A página do jogo não apareceu na Steam.

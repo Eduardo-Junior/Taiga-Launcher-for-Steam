@@ -21,6 +21,10 @@
   <a href="README.de.md">Deutsch</a>
 </p>
 
+> [!WARNING]
+> **Early version:** the program may still have many bugs. Please report them when you can, through **Report a problem** in the app or in [Issues](https://github.com/GabrielTaiga/Taiga-Launcher/issues).
+
+
 ---
 
 ## 🔥 Highlights
@@ -104,7 +108,6 @@
 | PS3 / PS Vita / PS4 in emulators | RPCS3, Vita3K and shadPS4 trophies | Nothing |
 | Console ports for PC | The game's own trophy list + the port's unlock log | Nothing |
 | Epic Games / GOG / Xbox | The store's own achievements | Sign in once |
-| PS4 ports with a PlayStation account (optional) | Official Sony list in your language + trophies already earned on console | Sign in with PlayStation |
 | PC games that also exist on Steam | Official Steam list + progress saved on the PC | Nothing |
 
 Every unlock shows the **native Steam achievement notification**, with sound.
@@ -151,7 +154,7 @@ It's portable: no installer, no Millennium, no SFP, no Node.js.
 ## ❓ FAQ
 
 **Does it change my games or my accounts?**
-No. It only creates Steam shortcuts and reads progress files. In your accounts (Epic, GOG, Xbox, PlayStation, RetroAchievements) it only reads achievements. Logins are encrypted by Windows itself and only your user on this PC can read them.
+No. It only creates Steam shortcuts and reads progress files. In your accounts (Epic, GOG, Xbox, RetroAchievements) it only reads achievements. Logins are encrypted by Windows itself and only your user on this PC can read them.
 
 **Does it give me Steam licenses, cards or real Steam achievements?**
 No. Everything is shown locally in your Steam client. It doesn't change ownership, inventory or your public Steam profile.

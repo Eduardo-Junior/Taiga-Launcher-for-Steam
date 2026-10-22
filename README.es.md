@@ -21,6 +21,10 @@
   <a href="README.de.md">Deutsch</a>
 </p>
 
+> [!WARNING]
+> **Versión inicial:** el programa todavía puede tener muchos errores. Informa de los fallos cuando puedas, con **Informar un problema** en el programa o en [Issues](https://github.com/GabrielTaiga/Taiga-Launcher/issues).
+
+
 ---
 
 ## 🔥 Lo más destacado
@@ -104,7 +108,6 @@
 | PS3 / PS Vita / PS4 en emuladores | Trofeos de RPCS3, Vita3K y shadPS4 | Nada |
 | Ports de consola para PC | La lista de trofeos del propio juego + el registro del port | Nada |
 | Epic Games / GOG / Xbox | Los logros de la propia tienda | Iniciar sesión una vez |
-| Ports de PS4 con cuenta PlayStation (opcional) | Lista oficial de Sony en tu idioma + trofeos ya ganados en la consola | Iniciar sesión con PlayStation |
 | Juegos de PC que también están en Steam | Lista oficial de Steam + progreso guardado en el PC | Nada |
 
 Cada desbloqueo aparece con la **notificación nativa de logros de Steam**, con sonido.
@@ -151,7 +154,7 @@ Es portable: sin instalador, sin Millennium, sin SFP, sin Node.js.
 ## ❓ Preguntas frecuentes
 
 **¿Modifica mis juegos o mis cuentas?**
-No. Solo crea accesos directos en Steam y lee archivos de progreso. En tus cuentas (Epic, GOG, Xbox, PlayStation, RetroAchievements) solo lee los logros. Los inicios de sesión los cifra el propio Windows y solo tu usuario en este PC puede leerlos.
+No. Solo crea accesos directos en Steam y lee archivos de progreso. En tus cuentas (Epic, GOG, Xbox, RetroAchievements) solo lee los logros. Los inicios de sesión los cifra el propio Windows y solo tu usuario en este PC puede leerlos.
 
 **¿Obtengo licencias, cromos o logros reales de Steam?**
 No. Todo se muestra localmente en tu Steam. No cambia la propiedad de los juegos, el inventario ni tu perfil público de Steam.

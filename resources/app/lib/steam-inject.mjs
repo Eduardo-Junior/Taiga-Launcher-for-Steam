@@ -141,6 +141,16 @@ export class SteamInjector {
   const fails = this.failures.get(targetId) || 0; if (fails >= 3 && Date.now() - (this.failedAt?.get(targetId) || 0) < Math.min(300000, 15000 * fails)) return false;
   const ready = await this.send('Runtime.evaluate', {expression: 'document.readyState', returnByValue: true}, sessionId);
   if (ready?.result?.value === 'loading') { this.schedule(targetId, 500); return false; }
+  // A Steam acabou de abrir: a interface dela ainda está montando. Injetar agora (script grande no contexto principal)
+  // travava o steamwebhelper ("não está respondendo") quando o Taiga Launcher já estava aberto antes da Steam.
+  // Espera a janela ter alguns segundos de vida (no contexto principal, também o SteamClient pronto).
+  try {
+   const minAge = kind === 'shared' ? 15000 : 4000;
+   const st = await this.send('Runtime.evaluate', {expression: `({age: performance.now(), client: !!(window.SteamClient && window.SteamClient.Apps)})`, returnByValue: true}, sessionId);
+   const v = st?.result?.value;
+   const age = Number(v?.age) || 0, client = !!v?.client;
+   if (v && typeof v === 'object' && typeof v.age === 'number' && age < minAge || (v && typeof v === 'object' && typeof v.age === 'number' && kind === 'shared' && !client)) { this.schedule(targetId, Math.max(1000, Math.min(minAge - age, 15000))); return false; }
+  } catch {}
   let scripts = null;
   try { scripts = await this.scripts(); } catch (e) { this.lastError = 'Falha ao montar o script (' + kind + '): ' + String(e?.message || e).slice(0, 180); this.log(this.lastError); this.fail(targetId); return false; }
   const source = scripts?.[kind];
@@ -184,7 +194,8 @@ export class SteamInjector {
    try {
     const r = await this.send('Runtime.evaluate', {expression: `(async()=>{const f=window.__TAIGA_NOTIFY__;return f?await f(${JSON.stringify(payload)}):false})()`, awaitPromise: true, returnByValue: true}, this.sessions.get(id));
     if (r?.result?.value === true) return true;
-   } catch {}
+    this.log('Notificação nativa não mostrada (' + (this.kinds.get(id) || '?') + '): ' + String(r?.result?.value ?? r?.exceptionDetails?.text ?? 'sem resposta').slice(0, 160));
+   } catch (e) { this.log('Notificação nativa: ' + String(e?.message || e).slice(0, 160)); }
   }
   return false;
  }

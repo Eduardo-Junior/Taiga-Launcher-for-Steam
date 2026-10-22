@@ -811,3 +811,10 @@ export function disposeAchievementNotifications(): void {
 	clearLocalAchievementGameInfoCache();
 	nativeAchievementNotificationProto = null;
 }
+
+// Taiga Launcher: o programa entrega as conquistas por aqui, usando o mesmo caminho nativo do NativeGameLink
+// (janela do jogo, Big Picture ou área de trabalho), que reconhece mais telas da Steam que o método próprio.
+try {
+	(window as any).__TAIGA_NGL_NATIVE_TOAST__ = (appid: string | number, achievement: LocalAchievementItem): boolean =>
+		showNativeAchievementToast(String(appid), achievement);
+} catch {}

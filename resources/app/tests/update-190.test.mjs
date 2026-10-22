@@ -59,7 +59,7 @@ test('1.9.0: Xbox / Microsoft Store, login token, achievements by package name, 
   assert.ok(seen.some(u => /achievements\.xboxlive\.com\/users\/xuid\(42\)\/achievements\?titleId=99/.test(u)));
   const none = await st.xbox({session: null});
   assert.equal(none.status, 'unconfigured');
-  assert.match(app, /ACC_KINDS=\['epic','xbox','psn','gog','ra'\]/);
+  assert.match(app, /ACC_KINDS=\['epic','xbox','gog','ra'\]/);
 });
 
 test('1.9.0: yuzu game folders, guess screen, installed dialog; texts in 5 languages', async () => {

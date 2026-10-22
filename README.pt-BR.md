@@ -21,6 +21,10 @@
   <a href="README.de.md">Deutsch</a>
 </p>
 
+> [!WARNING]
+> **Versão inicial:** o programa ainda pode ter muitos erros. Relate os bugs quando puder, pelo botão **Relatar problema** do programa ou em [Issues](https://github.com/GabrielTaiga/Taiga-Launcher/issues).
+
+
 ---
 
 ## 🔥 Destaques
@@ -104,7 +108,6 @@
 | PS3 / PS Vita / PS4 em emulador | Troféus do RPCS3, Vita3K e shadPS4 | Nada |
 | Ports de console para PC | Lista de troféus do próprio jogo + registro do port | Nada |
 | Epic Games / GOG / Xbox | Conquistas da própria loja | Entrar com a conta uma vez |
-| Ports de PS4 com conta PlayStation (opcional) | Lista oficial da Sony no seu idioma + troféus já ganhos no console | Entrar com a conta PlayStation |
 | Jogos de PC que também existem na Steam | Lista oficial da Steam + progresso salvo no PC | Nada |
 
 Todo desbloqueio aparece com a **notificação nativa de conquista da Steam**, com som.
@@ -151,7 +154,7 @@ PPSSPP, PCSX2, DuckStation, ePSXe, RPCS3, Vita3K, shadPS4, Dolphin, Cemu, Ryujin
 ## ❓ Perguntas frequentes
 
 **Ele mexe nos meus jogos ou nas minhas contas?**
-Não. Ele só cria atalhos na Steam e lê arquivos de progresso. Nas contas (Epic, GOG, Xbox, PlayStation, RetroAchievements) ele só lê as conquistas. Os logins ficam cifrados pelo próprio Windows e só o seu usuário, neste PC, consegue ler.
+Não. Ele só cria atalhos na Steam e lê arquivos de progresso. Nas contas (Epic, GOG, Xbox, RetroAchievements) ele só lê as conquistas. Os logins ficam cifrados pelo próprio Windows e só o seu usuário, neste PC, consegue ler.
 
 **Ganho licenças, cartas ou conquistas reais da Steam?**
 Não. Tudo é mostrado localmente na sua Steam. Nada muda na posse dos jogos, no inventário ou no seu perfil público da Steam.

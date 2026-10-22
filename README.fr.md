@@ -21,6 +21,10 @@
   <a href="README.de.md">Deutsch</a>
 </p>
 
+> [!WARNING]
+> **Version initiale :** le programme peut encore contenir de nombreux bugs. Signalez-les quand vous le pouvez, avec **Signaler un problème** dans le programme ou dans les [Issues](https://github.com/GabrielTaiga/Taiga-Launcher/issues).
+
+
 ---
 
 ## 🔥 Points forts
@@ -104,7 +108,6 @@
 | PS3 / PS Vita / PS4 sur émulateur | Trophées de RPCS3, Vita3K et shadPS4 | Rien |
 | Portages de console sur PC | La liste de trophées du jeu + le journal du portage | Rien |
 | Epic Games / GOG / Xbox | Les succès de la boutique | Se connecter une fois |
-| Portages PS4 avec un compte PlayStation (facultatif) | Liste officielle de Sony dans votre langue + trophées déjà obtenus sur console | Se connecter avec PlayStation |
 | Jeux PC qui existent aussi sur Steam | Liste officielle de Steam + progression enregistrée sur le PC | Rien |
 
 Chaque déblocage s'affiche avec la **notification native des succès Steam**, avec le son.
@@ -151,7 +154,7 @@ C'est portable : pas d'installateur, pas de Millennium, pas de SFP, pas de Node.
 ## ❓ Questions fréquentes
 
 **Modifie-t-il mes jeux ou mes comptes ?**
-Non. Il crée seulement des raccourcis Steam et lit des fichiers de progression. Dans vos comptes (Epic, GOG, Xbox, PlayStation, RetroAchievements), il lit uniquement les succès. Les identifiants sont chiffrés par Windows et seul votre utilisateur sur ce PC peut les lire.
+Non. Il crée seulement des raccourcis Steam et lit des fichiers de progression. Dans vos comptes (Epic, GOG, Xbox, RetroAchievements), il lit uniquement les succès. Les identifiants sont chiffrés par Windows et seul votre utilisateur sur ce PC peut les lire.
 
 **Est-ce que j'obtiens des licences, des cartes ou de vrais succès Steam ?**
 Non. Tout est affiché localement dans votre Steam. Rien ne change pour la possession des jeux, l'inventaire ou votre profil Steam public.

@@ -21,6 +21,10 @@
   <b>Deutsch</b>
 </p>
 
+> [!WARNING]
+> **Frühe Version:** Das Programm kann noch viele Fehler enthalten. Melde Fehler, wenn du kannst, über **Problem melden** im Programm oder unter [Issues](https://github.com/GabrielTaiga/Taiga-Launcher/issues).
+
+
 ---
 
 ## 🔥 Highlights
@@ -104,7 +108,6 @@
 | PS3 / PS Vita / PS4 im Emulator | Trophäen aus RPCS3, Vita3K und shadPS4 | Nichts |
 | Konsolen-Ports für den PC | Trophäenliste des Spiels + Protokoll des Ports | Nichts |
 | Epic Games / GOG / Xbox | Die Erfolge des jeweiligen Stores | Einmal anmelden |
-| PS4-Ports mit PlayStation-Konto (optional) | Offizielle Sony-Liste in deiner Sprache + auf der Konsole verdiente Trophäen | Mit PlayStation anmelden |
 | PC-Spiele, die es auch auf Steam gibt | Offizielle Steam-Liste + auf dem PC gespeicherter Fortschritt | Nichts |
 
 Jede Freischaltung erscheint mit der **nativen Steam-Erfolgsbenachrichtigung**, mit Ton.
@@ -151,7 +154,7 @@ Portabel: kein Installer, kein Millennium, kein SFP, kein Node.js.
 ## ❓ Häufige Fragen
 
 **Verändert es meine Spiele oder Konten?**
-Nein. Es erstellt nur Steam-Verknüpfungen und liest Fortschrittsdateien. In deinen Konten (Epic, GOG, Xbox, PlayStation, RetroAchievements) liest es nur die Erfolge. Anmeldungen werden von Windows selbst verschlüsselt und nur dein Benutzer auf diesem PC kann sie lesen.
+Nein. Es erstellt nur Steam-Verknüpfungen und liest Fortschrittsdateien. In deinen Konten (Epic, GOG, Xbox, RetroAchievements) liest es nur die Erfolge. Anmeldungen werden von Windows selbst verschlüsselt und nur dein Benutzer auf diesem PC kann sie lesen.
 
 **Bekomme ich Steam-Lizenzen, Sammelkarten oder echte Steam-Erfolge?**
 Nein. Alles wird lokal in deinem Steam angezeigt. Besitz, Inventar und dein öffentliches Steam-Profil ändern sich nicht.

@@ -13,15 +13,17 @@
  function sound(){try{const s=window.SteamClient?.Sounds;if(typeof s?.PlaySound==='function')s.PlaySound(5);else if(typeof s?.PlayNavSound==='function')s.PlayNavSound(5);}catch{}}
  window.__TAIGA_NOTIFY__=async payload=>{
   try{
-   const P=findProto(),store=findStore();if(!P||!store)return false;
+   // Primeiro o caminho nativo do NativeGameLink (reconhece a janela do jogo, o Big Picture e a área de trabalho).
+   try{const ngl=window.__TAIGA_NGL_NATIVE_TOAST__;if(typeof ngl==='function'&&ngl(payload.appid||0,{name:String(payload.id||''),display_name:String(payload.title||''),description:String(payload.description||''),icon:String(payload.icon||''),icon_gray:String(payload.icon||''),hidden:false,global_percent:Number(payload.globalPercent)||0,earned:true,earned_time:Math.floor((Date.parse(payload.date||'')||Date.now())/1000),progress:0,max_progress:0})){sound();return true;}}catch{}
+   const P=findProto(),store=findStore();if(!P)return 'sem-proto';if(!store)return 'sem-store';
    const msg=P.fromObject({achievement_id:String(payload.id||''),appid:Number(payload.appid)||0,name:String(payload.title||''),description:String(payload.description||''),image_url:String(payload.icon||''),achieved:true,rtime_unlocked:Math.floor((Date.parse(payload.date||'')||Date.now())/1000),min_progress:0,current_progress:0,max_progress:0,global_achieved_pct:Number(payload.globalPercent)||0});
-   const binary=msg?.serializeBinary?.();if(!binary)return false;
+   const binary=msg?.serializeBinary?.();if(!binary)return 'sem-binario';
    const id=nextId--;
    if(active){try{store.ExpireToast?.(active);}catch{}active=null;}
    store.OnNotification(id,TYPE,binary);retireTray(store,id);
-   const toast=store.m_rgNotificationToasts.find(n=>n.notificationID===id);if(!toast)return false;
+   const toast=store.m_rgNotificationToasts.find(n=>n.notificationID===id);if(!toast)return 'sem-toast';
    active=toast;setTimeout(()=>{if(active===toast){try{store.ExpireToast?.(toast);}catch{}active=null;}},DURATION);
    sound();return true;
-  }catch{return false;}
+  }catch(e){return 'erro: '+String(e&&e.message||e).slice(0,120);}
  };
 })();

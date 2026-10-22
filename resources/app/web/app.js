@@ -57,7 +57,7 @@ function accDismissed(){try{return JSON.parse(localStorage.getItem(ACC_KEY)||'[]
 function accDismiss(items){try{localStorage.setItem(ACC_KEY,JSON.stringify([...new Set([...accDismissed(),...items])]));}catch{}}
 function accountNeeds(){const out={};for(const g of state.games||[])if(g.accountNeed&&!g.hidden)(out[g.accountNeed]||=[]).push(g.title);return out;}
 function queueAccountPrompt(kinds){for(const k of kinds)accQueue.add(k);if(accTimer)return;let tries=0;const tick=()=>{accTimer=null;if(!accQueue.size)return;if(working||UI.modalKey||UI.ob||UI.languagePicker){if(++tries<400)accTimer=setTimeout(tick,900);return;}const kinds=[...accQueue];accQueue.clear();accountPrompt(kinds);};accTimer=setTimeout(tick,900);}
-const ACC_KINDS=['epic','xbox','psn','gog','ra'],ACC_NAMES={epic:'Epic Games',xbox:'Xbox',psn:'PlayStation',gog:'GOG',ra:'RetroAchievements'};
+const ACC_KINDS=['epic','xbox','gog','ra'],ACC_NAMES={epic:'Epic Games',xbox:'Xbox',psn:'PlayStation',gog:'GOG',ra:'RetroAchievements'};
 function accountInfo(kind){const st=state.settings||{},games=(state.games||[]).filter(g=>g.accountKind===kind&&!g.hidden),need=games.filter(g=>g.accountNeed===kind);let connected=false,who='',logout=null,via='';
  if(kind==='epic'){connected=!!st.epicLogin;who=st.epicLogin?.name||'';if(connected)logout='epic-logout';}
  if(kind==='gog'){who=String(st.gogUser||'').trim();connected=!!who;}
