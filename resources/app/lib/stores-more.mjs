@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 
-const isFile = f => { try { return fs.statSync(f).isFile(); } catch { return false; } };
+const isFile = f => { try { return fs.statSync(f).isFile(); } catch (e) { return /\.exe$/i.test(String(f)) && (e?.code === 'EPERM' || e?.code === 'EACCES'); } };
 const isDir = f => { try { return fs.statSync(f).isDirectory(); } catch { return false; } };
 const readJSON = f => { try { if (fs.statSync(f).size > 16 * 1024 * 1024) return null; return JSON.parse(fs.readFileSync(f, 'utf8').replace(/^\uFEFF/, '')); } catch { return null; } };
 const readText = (f, max = 2 * 1024 * 1024) => { try { if (fs.statSync(f).size > max) return ''; return fs.readFileSync(f, 'utf8').replace(/^\uFEFF/, ''); } catch { return ''; } };

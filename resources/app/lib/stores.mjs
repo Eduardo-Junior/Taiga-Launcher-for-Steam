@@ -6,7 +6,12 @@ import path from 'node:path';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {scanXbox,scanRiot,scanHeroic,scanInstalledGames} from './stores-more.mjs';
+import {scanLegendary} from './legendary.mjs';
+// Jogos da Epic instalados pelo Taiga Launcher (Legendary): abrem pelo próprio Legendary.
+let legendaryExe = '';
+export const setLegendaryExe = exe => { legendaryExe = String(exe || ''); };
 import {windowsDrives} from './discover.mjs';
+import {executableTitle} from './executable-title.mjs';
 
 const run = promisify(execFile);
 const isFile = f => { try { return fs.statSync(f).isFile(); } catch { return false; } };
@@ -20,7 +25,7 @@ export function scanEpic(env = process.env) {
  const dir = path.join(env.PROGRAMDATA || env.ProgramData || 'C:\\ProgramData', 'Epic', 'EpicGamesLauncher', 'Data', 'Manifests');
  const out = [];
  let names = [];
- try { names = fs.readdirSync(dir).filter(n => n.toLowerCase().endsWith('.item')); } catch { return out; }
+ try { names = fs.readdirSync(dir).filter(n => n.toLowerCase().endsWith('.item')); } catch { names = []; }
  for (const name of names) {
   const m = readJSON(path.join(dir, name));
   if (!m || m.bIsIncompleteInstall || !m.DisplayName || !m.InstallLocation || !m.LaunchExecutable) continue;
@@ -30,6 +35,22 @@ export function scanEpic(env = process.env) {
   const url = `com.epicgames.launcher://apps/${m.CatalogNamespace}%3A${m.CatalogItemId}%3A${m.AppName}?action=launch&silent=true`;
   const needsLauncher = !!(m.bIsManaged || m.ExpectingDLCInstalled && Object.keys(m.ExpectingDLCInstalled).length);
   out.push({store: 'epic', storeName: 'Epic Games', id: m.CatalogItemId || m.AppName, namespace: m.CatalogNamespace || '', appName: m.AppName || '', title: m.DisplayName, path: exe, root: winPath(m.InstallLocation), url, needsLauncher});
+ }
+
+ // Novo Epic Games Launcher (EGL v2): instalações em %LOCALAPPDATA%\com.epicgames.eglv2\installations.jsonl, uma por linha.
+ const v2 = path.join(env.LOCALAPPDATA || path.join(env.USERPROFILE || '', 'AppData', 'Local'), 'com.epicgames.eglv2', 'installations.jsonl');
+ let text = ''; try { if (fs.statSync(v2).size < 8 * 1024 * 1024) text = fs.readFileSync(v2, 'utf8'); } catch {}
+ for (const line of text.split(/\r?\n/)) {
+  let m = null; try { m = JSON.parse(line.trim().replace(/^\uFEFF/, '')); } catch { continue; }
+  const dir = m?.dir || m?.installDir || m?.installLocation, launch = m?.launchExecutable || m?.launchExe;
+  if (!m || m.complete === false || !dir || !launch || (m.platform && !/windows/i.test(m.platform))) continue;
+  const root = winPath(dir), exe = path.join(root, ...String(launch).split(/[\\/]/).filter(p => p && p !== '.'));
+  if (out.some(o => o.root.toLowerCase() === root.toLowerCase())) continue;
+  let title = m.displayName || m.title || ''; if (!title) { try { title = executableTitle(exe) || ''; } catch {} }
+  if (!title || /launcher|bootstrap/i.test(title)) title = (root.split(/[\\/]/).filter(Boolean).pop() || '').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2').trim();
+  const app = m.artifactId || m.appName || '', item = m.itemId || m.catalogItemId || '';
+  const url = m.namespace && item && app ? `com.epicgames.launcher://apps/${m.namespace}%3A${item}%3A${app}?action=launch&silent=true` : '';
+  out.push({store: 'epic', storeName: 'Epic Games', id: item || app || root, namespace: m.namespace || '', appName: app, title, path: exe, root, url, needsLauncher: false, egl2: true});
  }
  return out;
 }
@@ -136,11 +157,32 @@ export async function scanAmazon(env = process.env) {
  } catch {} finally { try { db.close(); } catch {} }
  return out;
 }
+// Xbox / Microsoft Store pelo registro de pacotes do Windows (o mesmo caminho do Playnite): não depende de ler a pasta
+// do jogo, que o Windows protege. Só entram pacotes da loja com MicrosoftGame.config (jogos GDK) ou instalados numa
+// pasta de jogos do Xbox. O jogo abre pelo próprio Xbox: shell:AppsFolder\<família>!<app>.
+const XBOX_PS = "$ErrorActionPreference='SilentlyContinue';[Console]::OutputEncoding=New-Object System.Text.UTF8Encoding($false);$o=@();foreach($p in Get-AppxPackage -PackageTypeFilter Main){if($p.IsFramework -or $p.SignatureKind -ne 'Store' -or !$p.InstallLocation){continue};$l=$p.InstallLocation;$g=(Test-Path -LiteralPath (Join-Path $l 'MicrosoftGame.config')) -or ($l -match '\\\\(XboxGames|ModifiableWindowsApps)\\\\');if(!$g){continue};$m=$null;try{$m=Get-AppxPackageManifest $p}catch{};if(!$m){continue};$t=[string]$m.Package.Properties.DisplayName;foreach($a in @($m.Package.Applications.Application)){if(!$a.Id){continue};$o+=[pscustomobject]@{name=$p.Name;pfn=$p.PackageFamilyName;loc=$l;id=[string]$a.Id;exe=[string]$a.Executable;title=$t}}};ConvertTo-Json -InputObject @($o) -Compress -Depth 3";
+export function xboxPackageItems(rows) {
+ const out = [];
+ for (const r of Array.isArray(rows) ? rows : []) {
+  if (!r || !r.pfn || !r.id || !r.loc) continue;
+  const loc = String(r.loc), parts = loc.split(/[\\/]/).filter(Boolean), ci = parts.findIndex(x => /^content$/i.test(x));
+  const folder = ci > 0 ? parts[ci - 1] : parts.at(-1) || '';
+  let title = String(r.title || ''); if (!title || /^ms-resource:/i.test(title)) title = folder.replace(/_[\d.]+_x64__\w+$/i, '') || String(r.name);
+  const exe = path.join(loc, ...String(r.exe || 'GameLaunchHelper.exe').split(/[\\/]/));
+  out.push({store: 'xbox', storeName: 'Xbox', id: String(r.name), title, path: exe, root: loc, url: 'shell:AppsFolder\\' + r.pfn + '!' + r.id, needsLauncher: true});
+ }
+ return out;
+}
+async function scanXboxPackages() {
+ const {stdout} = await run('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', XBOX_PS], {windowsHide: true, maxBuffer: 8 * 1024 * 1024, timeout: 60000});
+ const text = String(stdout || '').trim(); if (!text) return [];
+ return xboxPackageItems(JSON.parse(text));
+}
 export async function scanStores({env = process.env, platform = process.platform} = {}) {
  const results = [], errors = [];
  const drives = platform === 'win32' ? windowsDrives() : [];
  const tasks = [['Epic Games', () => scanEpic(env)], ['GOG', () => scanGOG(env)], ['GOG', () => scanGOGRegistry()], ['Ubisoft Connect', () => scanUbisoft()], ['itch.io', () => scanItch(env)], ['Amazon Games', () => scanAmazon(env)],
-  ['Xbox', () => scanXbox({drives})], ['Riot Games', () => scanRiot(env)], ['Heroic', () => scanHeroic(env)],
+  ['Epic Games', () => scanLegendary({env, exe: legendaryExe})], ['Xbox', () => scanXbox({drives})], ['Xbox', async () => { if (platform !== 'win32') return []; const have = new Set(results.filter(r => r.store === 'xbox').map(r => r.id.toLowerCase())); return (await scanXboxPackages()).filter(i => !have.has(i.id.toLowerCase())); }], ['Riot Games', () => scanRiot(env)], ['Heroic', () => scanHeroic(env)],
   // Por último: EA app, Rockstar, Battle.net e jogos instalados sem loja (só com prova de que é jogo).
   ['Windows', () => scanInstalledGames({regQuery, skipRoots: results.map(r => r.root).filter(Boolean)})]];
  for (const [name, fn] of tasks) { try { results.push(...await fn()); } catch (e) { errors.push({file: name, message: String(e.message || e).slice(0, 200)}); } }
