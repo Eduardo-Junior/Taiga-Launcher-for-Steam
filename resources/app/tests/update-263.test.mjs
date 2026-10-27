@@ -6,7 +6,7 @@ import path from 'node:path';
 import {buildActivity, createGameExtras, pickSimilar, unlockSeconds} from '../lib/game-extras.mjs';
 import {SessionStore} from '../lib/launch-engine.mjs';
 
-test('Linha do tempo: conquistas por dia, metade e todas (sem sessões nem primeira vez)', () => {
+test('Linha do tempo: só conquistas por dia (sem marcos, sessões nem primeira vez)', () => {
  const day = 86400, base = 1790000000;
  const ach = [
   {title: 'A', unlocked: true, date: base, icon: '/art/a.png'}, {title: 'B', unlocked: true, date: String((base + 60) * 1000), icon: ''},
@@ -15,11 +15,11 @@ test('Linha do tempo: conquistas por dia, metade e todas (sem sessões nem prime
  const sessions = [{startedAt: new Date((base - day) * 1000).toISOString(), seconds: 3600}, {startedAt: new Date((base - day + 4000) * 1000).toISOString(), seconds: 1200}, {startedAt: new Date(base * 1000).toISOString(), seconds: 30}];
  const a = buildActivity({achievements: ach, sessions, iconUrl: u => u ? 'X' + u : ''});
  const kinds = a.map(x => x.kind + (x.type ? ':' + x.type : ''));
- assert.deepEqual(kinds, ['achievements', 'achievements', 'milestone:half']);
+ assert.deepEqual(kinds, ['achievements', 'achievements']);
  assert.equal(a[1].count, 2); assert.equal(a[1].progress, 2); assert.equal(a[1].total, 4); assert.equal(a[1].items[1].icon, 'X/art/a.png');
  assert.equal(a[0].progress, 3);
  const all = buildActivity({achievements: ach.map(x => ({...x, unlocked: true, date: x.date || base + 3 * day}))});
- assert.equal(all[0].type, 'complete');
+ assert.ok(all.every(x => x.kind === 'achievements'), 'sem marcos de metade/todas');
  assert.equal(unlockSeconds('2026-01-01 10:00:00'), Date.parse('2026-01-01T10:00:00Z') / 1000);
 });
 

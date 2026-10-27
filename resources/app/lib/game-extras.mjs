@@ -30,9 +30,7 @@ export function buildActivity({achievements = [], iconUrl = u => u} = {}) {
   running += list.length;
   out.push({kind: 'achievements', at: list[list.length - 1].at, count: list.length, progress: running, total, items: list.slice(-8).reverse().map(a => ({title: a.title, icon: a.icon}))});
  }
- // Marcos das conquistas.
- if (total >= 4 && unlocked.length >= Math.ceil(total / 2) && unlocked.length < total) out.push({kind: 'milestone', type: 'half', at: unlocked[Math.ceil(total / 2) - 1].at, progress: Math.ceil(total / 2), total});
- if (total > 0 && unlocked.length === total && achievements.every(a => a.unlocked)) out.push({kind: 'milestone', type: 'complete', at: unlocked[unlocked.length - 1].at + 1, total});
+ // Marcos (metade, todas) não entram na atividade: só os cartões das conquistas.
  return out.sort((a, b) => b.at - a.at).slice(0, 40);
 }
 

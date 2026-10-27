@@ -476,6 +476,10 @@ function openLoginModal(m: Mounted): void {
 }
 
 /** Monta o cartão de comentários (só nos jogos do Taiga sem página na Steam; o Taiga Launcher decide). */
+// Taiga Launcher: comentários online desligados por enquanto (o login com a Steam falhava). A caixa de texto volta a
+// ser a normal, sem servidor; para religar, troque para true.
+export const ONLINE_COMMENTS = false;
+
 export function mountOnlineComments(doc: Document, wrapper: HTMLElement, shortcutAppId: string | null | undefined): void {
 	const old = mounted.get(doc);
 	if (old) {
@@ -484,6 +488,7 @@ export function mountOnlineComments(doc: Document, wrapper: HTMLElement, shortcu
 	}
 	const area = (wrapper.querySelector('#gdl-status-text') || doc.getElementById('gdl-status-text')) as HTMLTextAreaElement | null;
 	if (area && !area.dataset.taigaOriginalPlaceholder) area.dataset.taigaOriginalPlaceholder = area.placeholder;
+	if (!ONLINE_COMMENTS) return;
 	if (!shortcutAppId || !/^\d+$/.test(String(shortcutAppId))) return;
 	const feed = wrapper.querySelector('#gdl-activity-feed'); if (!feed) return;
 	ensureStyle(doc);
@@ -543,7 +548,7 @@ export function mountOnlineComments(doc: Document, wrapper: HTMLElement, shortcu
 /** Caixa de comentário: nos jogos com comentários online, publica o comentário (true = tratado aqui). */
 export function submitOnlineComment(doc: Document, shortcutAppId: string | null | undefined, text: string, done: (ok: boolean) => void): boolean {
 	const m = mounted.get(doc);
-	if (!m || !m.root.isConnected || m.shortcutAppId !== String(shortcutAppId || '') || !m.state.enabled) return false;
+	if (!ONLINE_COMMENTS || !m || !m.root.isConnected || m.shortcutAppId !== String(shortcutAppId || '') || !m.state.enabled) return false;
 	if (!m.state.loggedIn) { showMessage(m, ''); openLoginModal(m); done(false); return true; }
 	showMessage(m, t('posting'), true);
 	void parse<{ ok?: boolean; item?: CommentItem; error?: string; minLevel?: number; wait?: number; detail?: string }>(postCall({ shortcut_app_id: m.shortcutAppId, text })).then(r => {

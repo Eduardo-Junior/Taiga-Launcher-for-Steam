@@ -1,4 +1,5 @@
 import {pfnOf} from './xbox-auth.mjs';
+import {xboxIdentity} from './stores-more.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {digest,json,save} from './files.mjs';
@@ -38,7 +39,9 @@ export class AchievementProviderManager{
  async storeAchievements(game,mode,language,live){
   if(!this.stores)return null;const c=this.config();
   if(mode==='epic'||mode==='auto'){const epic=epicGameInfo(game,this.epicList());if(epic){let auth=null;try{auth=await this.epicSession();}catch{}const data=await this.stores.epic({namespace:epic.namespace,accountId:this.epicAccount(),language,live:!!live,auth});if(data.achievements.length||mode==='epic')return data;}}
-  if((mode==='xbox'||mode==='auto')&&game.store?.name==='xbox'){let session=null;try{session=await this.xboxSession();}catch{}const data=await this.stores.xbox({session,pfn:pfnOf(game),name:game.title,language,live:!!live});if(data.achievements.length||mode==='xbox'||mode==='auto')return data;}
+  // Xbox / PC Game Pass: pela loja ou pelo MicrosoftGame.config ao lado do jogo (mesmo achado como jogo de PC comum).
+  const xb=(mode==='xbox'||mode==='auto')?xboxIdentity(game):null;
+  if(xb&&(game.store?.name==='xbox'||xb.pfn||xb.titleId)){let session=null;try{session=await this.xboxSession();}catch{}const data=await this.stores.xbox({session,pfn:xb.pfn||pfnOf(game),titleId:xb.titleId,name:game.title,altNames:[game.storeTitleEn,game.fileTitle,game.internalTitle].filter(Boolean),language,live:!!live});if(data.achievements.length||mode==='xbox'||mode==='auto')return data;}
   if(mode==='gog'||mode==='auto'){const id=gogProductId(game);if(id){try{const data=await this.stores.gog({productId:id,username:String(c.gogUser||'').trim(),language,live:!!live});if(data.achievements.length||mode==='gog')return data;}catch(error){if(mode==='gog')throw error;}}}
   return null;
  }
@@ -141,7 +144,7 @@ export class AchievementProviderManager{
   for(const a of list)for(const field of ['icon','lockedIcon']){const value=a[field];if(!value)continue;try{const u=new URL(value);if(u.protocol==='https:'&&['shared.fastly.steamstatic.com','shared.steamstatic.com','media.steampowered.com','cdn.akamai.steamstatic.com'].includes(u.hostname))continue;a[field]='';}catch{const root=base||this.roots(game)[0];if(!root){a[field]='';continue;}const f=path.resolve(root,value),rel=path.relative(fs.realpathSync(root),exists(f)?fs.realpathSync(f):f);if(rel.startsWith('..')||path.isAbsolute(rel)||!exists(f)||fs.statSync(f).size>4*1024*1024){a[field]='';continue;}const bytes=fs.readFileSync(f);let ext;if(bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])))ext='png';else if(bytes[0]===255&&bytes[1]===216)ext='jpg';else{a[field]='';continue;}const name=digest(bytes)+'.'+ext;saveImage(path.join(this.dir,'art',name),bytes);a[field]='/art/'+name;}}
   return {status:'ok',provider:'local',source:fromSteam?'Steam':appid?'Local · Steam':'Local',sourceLanguage:schema.language||schema.locale||'en',progressKnown:!!state,progressFile,metadataAppId:appid||null,achievements:list};
  }
- finish(game,input,key,{quiet=false}={}){const old=this.cached(game),data={...input,at:new Date().toISOString()};data.total=data.achievements.length;data.unlocked=data.achievements.filter(a=>a.unlocked).length;
+ finish(game,input,key,{quiet=false}={}){const old=this.cached(game),data={...input,at:new Date().toISOString()};autoPlatinum(data.achievements);data.total=data.achievements.length;data.unlocked=data.achievements.filter(a=>a.unlocked).length;
   if(['ok','offline'].includes(data.status)){if(!quiet&&old?.progressKnown!==false&&old?.achievements?.length&&data.progressKnown!==false){const known=new Map(old.achievements.map(a=>[String(a.id),a]));for(const a of data.achievements)if(a.unlocked&&known.has(String(a.id))&&!known.get(String(a.id)).unlocked&&!data.silentIds?.includes(String(a.id)))this.onUnlock?.(game,{...a,title:known.get(String(a.id)).title||a.title,description:known.get(String(a.id)).description||a.description},data.source);}
    const c=this.config(),language=c.language||'pt-BR';if(data.achievements.length&&(language!==data.sourceLanguage||data.achievements.some(a=>a.titleLanguage&&a.titleLanguage!==language||a.descriptionLanguage&&a.descriptionLanguage!==language))){const jobkey=digest(key+JSON.stringify(data.achievements.map(a=>[a.id,a.title,a.description]))),translated=json(path.join(this.dir,'cache','achievement-text-'+jobkey+'.json'),null);if(translated&&(translated.complete||Date.now()-Number(translated.at||0)<120000)){for(const a of data.achievements){const text=translated.rows?.[a.id];if(text)Object.assign(a,text);}data.translationStatus=translated.complete?'translated':'partial';}else{data.translationStatus='pending';(this.transFor||=new Map()).set(key,jobkey);this.translate(game,data,key,jobkey,language);}}
    this.latest.set(key,data);(this.latestAt||=new Map()).set(key,{at:Date.now(),sig:this.gameSig(game),file:this.fileMark(data.progressFile)});save(path.join(this.dir,'cache','achievement-'+key+'.json'),{data});
@@ -154,3 +157,13 @@ export class AchievementProviderManager{
   save(path.join(this.dir,'cache','achievement-text-'+jobkey+'.json'),{rows,complete,at:Date.now()});const latest=this.latest.get(key);if(latest){for(const a of latest.achievements)if(rows[a.id])Object.assign(a,rows[a.id]);latest.translationStatus=complete?'translated':'partial';save(path.join(this.dir,'cache','achievement-'+key+'.json'),{data:latest});}})().catch(()=>{}).finally(()=>this.jobs.delete(jobkey));this.jobs.set(jobkey,job);}
 }
 function saveImage(file,bytes){fs.mkdirSync(path.dirname(file),{recursive:true});if(!exists(file))fs.writeFileSync(file,bytes);}
+// Troféu de platina (PlayStation): o console dá a platina sozinho quando todos os outros troféus estão desbloqueados.
+// Progresso lido de arquivo (RPCS3 e outros) nem sempre traz a platina marcada; aqui ela segue a mesma regra.
+export function autoPlatinum(list){
+ if(!Array.isArray(list))return list;const plat=list.filter(a=>String(a?.grade||'').toUpperCase()==='P'),rest=list.filter(a=>String(a?.grade||'').toUpperCase()!=='P');
+ if(plat.length!==1||!rest.length||plat[0].unlocked||!rest.every(a=>a.unlocked))return list;
+ const dates=rest.map(a=>a.date).filter(Boolean).map(d=>/^\d+$/.test(String(d))?Number(d):Date.parse(d)).filter(Number.isFinite);
+ const last=dates.length?Math.max(...dates):null;
+ plat[0].unlocked=true;plat[0].date=last===null?null:(rest.some(a=>/^\d+$/.test(String(a.date)))?String(last):new Date(last).toISOString());plat[0].auto=true;
+ return list;
+}

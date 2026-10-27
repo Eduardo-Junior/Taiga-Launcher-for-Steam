@@ -69,7 +69,8 @@ function current(shortcutAppId: string | null | undefined): Extras | null {
 /** Itens da linha do tempo para o feed (só jogos do Taiga sem página na Steam). */
 export function taigaActivityFor(steamAppId: string, shortcutAppId: string | null | undefined): TaigaActivity[] {
 	if (!isTaigaVirtualAppId(steamAppId)) return [];
-	return (current(shortcutAppId)?.activity || []).filter(a => a.kind === 'achievements' || (a.kind === 'milestone' && (a.type === 'half' || a.type === 'complete')));
+	// Taiga Launcher: só os cartões das conquistas (os marcos "metade" e "todas" saíram da atividade).
+	return (current(shortcutAppId)?.activity || []).filter(a => a.kind === 'achievements');
 }
 export function taigaActivitySignature(steamAppId: string, shortcutAppId: string | null | undefined): string {
 	if (!isTaigaVirtualAppId(steamAppId)) return '';
@@ -152,12 +153,14 @@ const STYLE = `
 .taiga-x-owned{position:absolute;left:6px;top:6px;padding:2px 6px;border-radius:2px;background:rgba(26,159,255,.9);color:#fff;font-size:10.5px;font-weight:700}
 .taiga-x-name{font-size:13px;color:#dcdedf;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .taiga-x-year{font-size:12px;color:#8f98a0}
-.taiga-x-lightbox{position:fixed;inset:0;z-index:2147483600;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center}
+.taiga-x-lightbox{position:fixed;inset:0;z-index:2147483600;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;-webkit-app-region:no-drag}
+.taiga-x-lightbox *{-webkit-app-region:no-drag}
 .taiga-x-lightbox img{max-width:88vw;max-height:84vh;border-radius:3px;box-shadow:0 10px 40px #000}
-.taiga-x-lb-btn{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:26px;cursor:pointer}
+.taiga-x-lb-btn{position:absolute;z-index:2;top:50%;transform:translateY(-50%);width:52px;height:52px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:26px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.taiga-x-lb-btn::before{content:"";position:absolute;inset:-10px;border-radius:50%}
 .taiga-x-lb-btn:hover{background:rgba(255,255,255,.25)}
 .taiga-x-lb-prev{left:24px}.taiga-x-lb-next{right:24px}
-.taiga-x-lb-close{top:28px;right:24px;transform:none;font-size:22px}
+.taiga-x-lb-close{top:72px;right:28px;transform:none;font-size:22px}
 `;
 export function ensureTaigaExtrasStyle(doc: Document): void {
 	let style = doc.getElementById('taiga-extras-style');
@@ -199,7 +202,17 @@ function renderBlock(m: Mount, data: Extras | null): void {
 	const sig = JSON.stringify([similar, shots]);
 	if (sig === m.sig && root.childElementCount) return; m.sig = sig;
 	root.textContent = '';
-	// Primeiro os jogos parecidos (até 4, uma linha), depois as imagens (até 3, uma linha) e, no fim, o "Fim da atividade".
+	// Primeiro as imagens (até 3, uma linha), depois os jogos parecidos (até 4, uma linha) e, no fim, o "Fim da atividade".
+	if (shots.length) {
+		const sec = el(doc, 'section', 'taiga-x-sec'); sec.appendChild(el(doc, 'div', 'taiga-x-head', t('media')));
+		const strip = el(doc, 'div', 'taiga-x-strip');
+		shots.forEach((src, i) => {
+			const tile = el(doc, 'button', 'taiga-x-tile'); tile.type = 'button'; tile.appendChild(img(doc, src));
+			tile.addEventListener('click', e => { e.preventDefault(); lightbox(doc, shots, i); });
+			strip.appendChild(tile);
+		});
+		sec.appendChild(strip); root.appendChild(sec);
+	}
 	if (similar.length) {
 		const sec = el(doc, 'section', 'taiga-x-sec'); sec.appendChild(el(doc, 'div', 'taiga-x-head', t('similar')));
 		const grid = el(doc, 'div', 'taiga-x-similar');
@@ -215,16 +228,6 @@ function renderBlock(m: Mount, data: Extras | null): void {
 			grid.appendChild(card);
 		}
 		sec.appendChild(grid); root.appendChild(sec);
-	}
-	if (shots.length) {
-		const sec = el(doc, 'section', 'taiga-x-sec'); sec.appendChild(el(doc, 'div', 'taiga-x-head', t('media')));
-		const strip = el(doc, 'div', 'taiga-x-strip');
-		shots.forEach((src, i) => {
-			const tile = el(doc, 'button', 'taiga-x-tile'); tile.type = 'button'; tile.appendChild(img(doc, src));
-			tile.addEventListener('click', e => { e.preventDefault(); lightbox(doc, shots, i); });
-			strip.appendChild(tile);
-		});
-		sec.appendChild(strip); root.appendChild(sec);
 	}
 	const end = el(doc, 'div', 'gdl-activity-end'); end.appendChild(el(doc, 'span', '', gdlText('activity_end', 'End of activity')));
 	root.appendChild(end);

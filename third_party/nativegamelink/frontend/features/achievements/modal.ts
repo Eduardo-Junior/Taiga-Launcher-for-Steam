@@ -1,4 +1,5 @@
 import type { LocalAchievementData, LocalAchievementItem } from '../../domain/types';
+import { taigaAchievementEmptyText } from './empty-text';
 import { escapeHtml } from '../../core/text';
 import { gdlText, loc, localNumber } from '../../steam/localization';
 import { pickCachedLocalAchievementSnapshot } from './cache';
@@ -262,7 +263,7 @@ export async function openLocalAchievementsModal(doc: Document, data: LocalAchie
 			return rarity(b) - rarity(a);
 		});
 		if (query) rows = rows.filter(item => `${item.display_name} ${item.description} ${item.name}`.toLocaleLowerCase().includes(query));
-		list.innerHTML = rows.length ? rows.map(item => rowHtml(item, tab === 'global')).join('') : `<div class="gdl-lam-empty">${escapeHtml(gdlText('no_achievements', 'No achievements found.'))}</div>`;
+		list.innerHTML = rows.length ? rows.map(item => rowHtml(item, tab === 'global')).join('') : `<div class="gdl-lam-empty">${escapeHtml((!query && taigaAchievementEmptyText(activeData)) || gdlText('no_achievements', 'No achievements found.'))}</div>`;
 	};
 	const eventCleanups: Array<() => void> = [];
 	const listen = (element: EventTarget | null, type: string, listener: (event: Event) => void): void => {

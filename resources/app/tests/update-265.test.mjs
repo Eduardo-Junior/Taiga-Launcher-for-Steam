@@ -7,7 +7,7 @@ const require = createRequire(import.meta.url);
 test('Primeiro uso novo: emuladores antes, tela do que falta, contas, lojas e coleções; ajuda e novidades nos 5 idiomas', () => {
  const app = fs.readFileSync(new URL('../web/app.js', import.meta.url), 'utf8');
  assert.match(app, /api\('emulators-discover',\{\}\);\}catch\{\}UI\.ob\.step='games'/, 'emuladores procurados antes da etapa de jogos');
- for (const k of ["st==='found'", "st==='accounts'", "data-act=\"ob3-ra\"", "ob3.needEmu", "check('emuCollection'", 'function helpView', 'function newsDialog', "const NEWS={'"+JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url))).version]) assert.ok(app.includes(k), k);
+ for (const k of ["st==='found'", "st==='accounts'", "data-act=\"ob3-ra\"", "ob3.needEmu", "check('emuCollection'", 'function helpView', 'function newsDialog', "const NEWS={'"+JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url))).version.split('.').slice(0,2).join('.'), 'function newsKey']) assert.ok(app.includes(k), k);
  const server = fs.readFileSync(new URL('../server.mjs', import.meta.url), 'utf8');
  assert.match(server, /autoCollection:false/, 'coleção "Taiga Launcher" não é criada sozinha');
  assert.match(server, /route==='\/api\/setup-summary'/);

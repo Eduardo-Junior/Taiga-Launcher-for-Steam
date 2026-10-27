@@ -222,6 +222,9 @@ export interface LocalAchievementData {
 	unlocked: number;
 	total: number;
 	achievements: LocalAchievementItem[];
+	/** Taiga Launcher: por que a lista veio vazia (unconfigured, unmapped, offline...) e de qual loja. */
+	taiga_status?: string;
+	taiga_provider?: string;
 }
 
 export type NativeGameFeatureKind =

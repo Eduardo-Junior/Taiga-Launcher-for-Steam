@@ -18,6 +18,22 @@ const isFile = f => { try { return fs.statSync(f).isFile(); } catch { return fal
 const isDir = f => { try { return fs.statSync(f).isDirectory(); } catch { return false; } };
 const readJSON = f => { try { if (fs.statSync(f).size > 8 * 1024 * 1024) return null; return JSON.parse(fs.readFileSync(f, 'utf8').replace(/^\uFEFF/, '')); } catch { return null; } };
 const winPath = p => String(p || '').replace(/\//g, path.sep);
+const AUX_EXE = /^(?:unins\d*|uninstall.*|setup.*|install.*|update.*|patch.*|vc_?redist.*|dxsetup|dotnet.*|crash.*|unitycrashhandler.*|ue4prereq.*|easyanticheat.*|battleye.*|be(?:service|launcher).*|upc.*|uplay.*|ubisoftconnect.*|launcher_?helper.*|cefprocess.*|notification.*|report.*|7z.*|python.*|dosbox.*|scummvm.*|benchmark.*|config.*|settings.*)\.exe$/i;
+// Executável principal de uma pasta de jogo: o maior .exe que não é instalador, desinstalador ou ferramenta (até 3
+// níveis, preferindo pastas bin/x64/Binaries). Usado quando a loja não diz qual é o executável.
+export function mainExecutable(root, depth = 3) {
+ let best = null;
+ const walk = (dir, d) => {
+  let list = []; try { list = fs.readdirSync(dir, {withFileTypes: true}); } catch { return; }
+  for (const e of list) {
+   const f = path.join(dir, e.name);
+   if (e.isFile() && /\.exe$/i.test(e.name) && !AUX_EXE.test(e.name)) { let size = 0; try { size = fs.statSync(f).size; } catch {} if (size > 256 * 1024 && (!best || size > best.size)) best = {f, size}; }
+   else if (e.isDirectory() && d < depth && !/^(?:redist|_?commonredist|directx|support|tools?|docs?|manual|__installer|_installer|installer|prerequisites|eac|easyanticheat|battleye)$/i.test(e.name)) walk(f, d + 1);
+  }
+ };
+ walk(root, 0);
+ return best?.f || '';
+}
 export const explorer = (env = process.env) => path.join(env.SystemRoot || env.windir || 'C:\\Windows', 'explorer.exe');
 
 // --- Epic Games: manifestos .item em ProgramData ---
@@ -63,6 +79,8 @@ function gogInfo(folder) {
   for (const n of names) {
    const info = readJSON(path.join(base, n));
    if (!info?.name) continue;
+   // DLC e extras têm o próprio .info apontando para o jogo principal.
+   if (info.rootGameId && info.gameId && String(info.rootGameId) !== String(info.gameId)) continue;
    const task = (info.playTasks || []).find(t => t.isPrimary && t.type === 'FileTask' && (!t.category || ['game', 'launcher'].includes(t.category))) || (info.playTasks || []).find(t => t.type === 'FileTask' && t.path);
    if (!task?.path) continue;
    out.push({store: 'gog', storeName: 'GOG', id: String(info.gameId || ''), title: info.name, path: path.join(base, winPath(task.path)), root: base, args: task.arguments || '', workingDir: task.workingDir ? path.join(base, winPath(task.workingDir)) : base, needsLauncher: false});
@@ -71,10 +89,14 @@ function gogInfo(folder) {
  }
  return out;
 }
-export function scanGOG(env = process.env, extraFolders = []) {
+export function scanGOG(env = process.env, extraFolders = [], drives = []) {
  const galaxy = path.join(env.PROGRAMDATA || env.ProgramData || 'C:\\ProgramData', 'GOG.com', 'Galaxy', 'config.json');
  const cfg = readJSON(galaxy) || {};
- const libraries = [...(Array.isArray(cfg.installationPaths) && cfg.installationPaths.length ? cfg.installationPaths : cfg.libraryPath ? [cfg.libraryPath] : []), ...extraFolders];
+ // Pastas do Galaxy (config) + as padrão do Galaxy e dos instaladores offline da GOG em cada unidade.
+ const defaults = [];
+ for (const pf of [env.ProgramFiles, env['ProgramFiles(x86)']].filter(Boolean)) defaults.push(path.join(pf, 'GOG Galaxy', 'Games'), path.join(pf, 'GOG Games'));
+ for (const d of drives) defaults.push(path.join(d, 'GOG Games'), path.join(d, 'GOG Galaxy', 'Games'), path.join(d, 'Games', 'GOG Galaxy'), path.join(d, 'Games', 'GOG Games'));
+ const libraries = [...new Set([...(Array.isArray(cfg.installationPaths) ? cfg.installationPaths : []), ...(cfg.libraryPath ? [cfg.libraryPath] : []), ...defaults, ...extraFolders].map(p => String(p || '')).filter(p => p && isDir(p)))];
  const out = [];
  for (const lib of libraries) {
   let entries = [];
@@ -107,17 +129,24 @@ export async function scanGOGRegistry() {
  return out;
 }
 // --- Ubisoft Connect: instalações registradas e nomes da desinstalação ---
-export async function scanUbisoft() {
- if (process.platform !== 'win32') return [];
- const launcher = (await regQuery('HKLM\\SOFTWARE\\WOW6432Node\\Ubisoft\\Launcher'))[0]?.values?.InstallDir;
- const installs = (await regQuery('HKLM\\SOFTWARE\\WOW6432Node\\Ubisoft\\Launcher\\Installs')).filter(e => e.values.InstallDir && isDir(e.values.InstallDir));
- const uninstall = await regQuery('HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall');
+export async function scanUbisoft({query = regQuery} = {}) {
+ if (process.platform !== 'win32' && query === regQuery) return [];
+ const keys = ['HKLM\\SOFTWARE\\WOW6432Node\\Ubisoft\\Launcher', 'HKLM\\SOFTWARE\\Ubisoft\\Launcher'];
+ let launcher = '';
+ for (const k of keys) { launcher = (await query(k))[0]?.values?.InstallDir || ''; if (launcher) break; }
+ const installs = [], ids = new Set();
+ for (const k of keys) for (const e of await query(k + '\\Installs')) { const id = String(e.key).split(/[\\/]/).pop(); if (/^\d+$/.test(id) && e.values.InstallDir && !ids.has(id) && isDir(e.values.InstallDir)) { ids.add(id); installs.push(e); } }
+ const uninstall = [...await query('HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall'), ...await query('HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall')];
  const out = [];
  for (const install of installs) {
-  const id = path.basename(install.key), info = uninstall.find(e => e.key.endsWith('Uplay Install ' + id))?.values || {};
-  const icon = String(info.DisplayIcon || '').replace(/^"|"$/g, '').replace(/,\d+$/, '');
-  if (!info.DisplayName || !isFile(icon) || !/\.exe$/i.test(icon)) continue;
-  out.push({store: 'ubisoft', storeName: 'Ubisoft Connect', id, title: info.DisplayName, path: icon, root: install.values.InstallDir, url: `uplay://launch/${id}/0`, needsLauncher: true, launcherExe: launcher ? path.join(launcher, 'upc.exe') : null});
+  const id = String(install.key).split(/[\\/]/).pop(), info = uninstall.find(e => e.key.endsWith('Uplay Install ' + id))?.values || {};
+  const root = String(install.values.InstallDir).replace(/[\\/]+$/, '');
+  // O ícone da desinstalação costuma ser o próprio jogo; quando é um .ico (ou falta), o executável vem da pasta.
+  let exe = String(info.DisplayIcon || '').replace(/^"|"$/g, '').replace(/,\s*-?\d+$/, '');
+  if (!/\.exe$/i.test(exe) || !isFile(exe) || /\b(?:upc|uplay|ubisoftconnect|ubisoftgamelauncher)\.exe$/i.test(exe)) exe = mainExecutable(root);
+  if (!exe) continue;
+  const title = String(info.DisplayName || '').trim() || path.basename(root);
+  out.push({store: 'ubisoft', storeName: 'Ubisoft Connect', id, title, path: exe, root, url: `uplay://launch/${id}/0`, needsLauncher: true, launcherExe: launcher ? path.join(launcher, 'upc.exe') : null});
  }
  return out;
 }
@@ -181,7 +210,7 @@ async function scanXboxPackages() {
 export async function scanStores({env = process.env, platform = process.platform} = {}) {
  const results = [], errors = [];
  const drives = platform === 'win32' ? windowsDrives() : [];
- const tasks = [['Epic Games', () => scanEpic(env)], ['GOG', () => scanGOG(env)], ['GOG', () => scanGOGRegistry()], ['Ubisoft Connect', () => scanUbisoft()], ['itch.io', () => scanItch(env)], ['Amazon Games', () => scanAmazon(env)],
+ const tasks = [['Epic Games', () => scanEpic(env)], ['GOG', () => scanGOG(env, [], drives)], ['GOG', () => scanGOGRegistry()], ['Ubisoft Connect', () => scanUbisoft()], ['itch.io', () => scanItch(env)], ['Amazon Games', () => scanAmazon(env)],
   ['Epic Games', () => scanLegendary({env, exe: legendaryExe})], ['Xbox', () => scanXbox({drives})], ['Xbox', async () => { if (platform !== 'win32') return []; const have = new Set(results.filter(r => r.store === 'xbox').map(r => r.id.toLowerCase())); return (await scanXboxPackages()).filter(i => !have.has(i.id.toLowerCase())); }], ['Riot Games', () => scanRiot(env)], ['Heroic', () => scanHeroic(env)],
   // Por último: EA app, Rockstar, Battle.net e jogos instalados sem loja (só com prova de que é jogo).
   ['Windows', () => scanInstalledGames({regQuery, skipRoots: results.map(r => r.root).filter(Boolean)})]];

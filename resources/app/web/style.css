@@ -1726,3 +1726,5 @@ body.dropping::after{content:attr(data-drop);position:fixed;inset:14px;z-index:9
 .supd-pays.is-pix .sup-pay-logo{width:44px;height:44px}
 .supd-alt{margin:10px 26px 0;color:var(--muted);font-size:.84rem;text-align:center}
 .supd-alt a{color:inherit;font-weight:600;text-decoration:underline;text-underline-offset:2px}.supd-alt a:hover{color:var(--accent)}
+/* Capa oficial da loja carregada na hora, por cima da capa gerada (se falhar, a gerada continua visível) */
+.art-gen .art-remote{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;pointer-events:none}
