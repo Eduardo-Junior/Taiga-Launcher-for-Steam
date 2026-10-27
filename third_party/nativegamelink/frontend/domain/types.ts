@@ -55,6 +55,9 @@ export interface SteamCommunityItemsCatalog {
 	source?: string;
 	error?: string;
 	transient_error?: boolean;
+	/** Taiga Launcher: cartas geradas para jogos sem página na Steam (personagens do IGDB ou conquistas). */
+	generated?: boolean;
+	game?: string;
 }
 
 export interface SteamGameData {
